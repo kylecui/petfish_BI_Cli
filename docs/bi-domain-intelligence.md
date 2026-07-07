@@ -525,6 +525,51 @@ class OutputValidator:
         return ValidationResult(valid=len(errors) == 0, errors=errors)
 ```
 
+### 6.3.1 ClaimsLedger 数据流（Momus 审查补充）
+
+**问题**：`agent.run_structured()` 返回 `StructuredResult[BIReport]`，只含解析后的 report。Tool 执行期间产生的 ClaimsLedger 存在于 ReAct trajectory 的 observation 字符串中，但 `StructuredResult` 不携带结构化 claims。`OutputValidator.validate(report, claims)` 的 `claims` 参数从哪来？
+
+**方案**：Tool 通过 DI 持有共享 `ClaimsRegistry` 引用，`execute()` 时写入。不修改框架。
+
+```python
+class ClaimsRegistry:
+    """进程内 claims 收集器，BIApplication 创建并注入到每个 Tool。"""
+    def __init__(self):
+        self._claims: list[Claim] = []
+    def add(self, claim: Claim) -> None:
+        self._claims.append(claim)
+    def to_ledger(self) -> ClaimsLedger:
+        return ClaimsLedger(claims=tuple(self._claims), metadata={})
+
+class LoadDataTool:
+    """Tool 持有 registry 引用，execute() 时写入。"""
+    def __init__(self, data_root: Path, registry: ClaimsRegistry):
+        self._data_root = data_root
+        self._registry = registry  # DI 注入
+
+    def execute(self, args: dict) -> ToolResult:
+        records = _ingest(args["source"], self._data_root, args.get("filters"))
+        claims = _records_to_claims(records)  # 每条记录 → Claim
+        for c in claims:
+            self._registry.add(c)             # 写入共享 registry
+        return ToolResult(value=_claims_to_metadata(claims))  # 返回 metadata 给 LLM
+
+class BIApplication:
+    def execute(self, query: BIQuery) -> BIReport:
+        registry = ClaimsRegistry()           # 每次查询新建
+        agent = self._make_agent(registry)    # 注入到 Tools
+        result = agent.run_structured(Task(prompt=query.prompt), BIReport)
+        if result.data is None:
+            return BIReport(status="parse_error", answer=result.answer)
+        validation = self._validator.validate(result.data, registry.to_ledger())
+        if not validation.valid:
+            return BIReport(status="validation_failed", answer=result.answer,
+                            data={"errors": validation.errors})
+        return result.data
+```
+
+**关键**：Agent 每次 `execute()` 新建 registry（非共享），与 ADR-006（Session 每请求独立）一致。FakeModel 测试时 registry 仍正常工作——Tool 的 `execute()` 照常写入 registry。
+
 ### 6.4 T1-T5 Truth Labeling（可选，M-1 后期）
 
 每个 finding 标注 truth level：
