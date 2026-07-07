@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import pytest
+from petfishframework.retrieval import CRAGRetriever
 
 from petfish_bi_cli.config.rag_loader import build_retriever
-from petfishframework.retrieval import CRAGRetriever
 
 
 class TestBuildRetriever:

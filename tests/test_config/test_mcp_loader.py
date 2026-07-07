@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from petfish_bi_cli.config.mcp_loader import MCPLoader, _resolve_env
 
 
@@ -57,7 +55,13 @@ class TestMCPLoader:
 
         config_file = tmp_path / "mcp.yml"
         config_file.write_text(
-            'auto_load: true\nservers:\n  filesystem:\n    command: npx\n    args:\n      - "-y"\n      - "server-fs"\n',
+            "auto_load: true\n"
+            "servers:\n"
+            "  filesystem:\n"
+            "    command: npx\n"
+            "    args:\n"
+            '      - "-y"\n'
+            '      - "server-fs"\n',
             encoding="utf-8",
         )
         loader = MCPLoader(config_path=str(config_file))
@@ -74,7 +78,13 @@ class TestMCPLoader:
 
         config_file = tmp_path / "mcp.yml"
         config_file.write_text(
-            'auto_load: true\nservers:\n  db:\n    command: npx\n    args:\n      - "server"\n    env:\n      DB_TOKEN: "${TOKEN}"\n',
+            "auto_load: true\n"
+            "servers:\n"
+            "  db:\n"
+            "    command: npx\n"
+            '    args:\n      - "server"\n'
+            "    env:\n"
+            '      DB_TOKEN: "${TOKEN}"\n',
             encoding="utf-8",
         )
         loader = MCPLoader(config_path=str(config_file))
@@ -102,7 +112,14 @@ class TestMCPLoader:
 
         config_file = tmp_path / "mcp.yml"
         config_file.write_text(
-            'auto_load: true\nservers:\n  fs:\n    command: npx\n    args:\n      - "fs"\n  db:\n    command: npx\n    args:\n      - "db"\n',
+            "auto_load: true\n"
+            "servers:\n"
+            "  fs:\n"
+            "    command: npx\n"
+            '    args:\n      - "fs"\n'
+            "  db:\n"
+            "    command: npx\n"
+            '    args:\n      - "db"\n',
             encoding="utf-8",
         )
         loader = MCPLoader(config_path=str(config_file))

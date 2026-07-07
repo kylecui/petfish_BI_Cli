@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import jieba
-
 from petfishframework.core.contracts import Retriever
 from petfishframework.core.types import Snippet
 

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from petfish_bi_cli.retrieval.chinese_retriever import ChineseRetriever
 
 

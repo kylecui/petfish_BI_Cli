@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 import time
-from pathlib import Path
-
-import pytest
 
 from petfish_bi_cli.config.prompt_manager import PromptManager
 

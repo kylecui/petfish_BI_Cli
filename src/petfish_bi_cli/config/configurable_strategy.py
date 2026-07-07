@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from petfish_bi_cli.config.prompt_manager import PromptManager
 from petfish_bi_cli.agent.strategy import BIAgentStrategy
+from petfish_bi_cli.config.prompt_manager import PromptManager
 
 
 class ConfigurableBIAgentStrategy(BIAgentStrategy):

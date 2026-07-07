@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from petfishframework.core.contracts import Tool
 from petfishframework.mcp.client import connect_stdio
 

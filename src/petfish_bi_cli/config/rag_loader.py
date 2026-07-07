@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
-
 from petfishframework.core.contracts import Retriever
 from petfishframework.retrieval import CRAGRetriever
 
@@ -31,7 +29,7 @@ def build_retriever(config: dict[str, Any]) -> Retriever | None:
 
     base = ChineseRetriever()
 
-    for name, cfg in retrievers_cfg.items():
+    for _name, cfg in retrievers_cfg.items():
         if "documents" in cfg:
             for doc in cfg["documents"]:
                 base.add(doc["content"], metadata=doc.get("metadata", {}))
