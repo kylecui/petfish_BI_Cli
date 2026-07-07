@@ -1,0 +1,5 @@
+# PEtFiSh Project Mode
+# depth: urgent | balanced | thorough
+# rigor: true | false (forced true when depth=thorough)
+depth: balanced
+rigor: false
