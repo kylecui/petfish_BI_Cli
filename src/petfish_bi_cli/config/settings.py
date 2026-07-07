@@ -64,13 +64,16 @@ _DEFAULTS: dict[str, Any] = {
 
 
 def load_settings(config_path: str | Path | None = None) -> Settings:
-    """Load settings with layered precedence: defaults < YAML < env vars.
+    """Load settings with layered precedence: defaults < .env < YAML < env vars.
 
     Args:
         config_path: Path to bi_cli.yml. If None, searches configs/bi_cli.yml.
     """
+    _load_dotenv()
     path = _resolve_config_path(config_path)
     raw = _deep_merge(_DEFAULTS, {})
+
+    raw = _apply_standard_env(raw)
 
     if path and path.exists():
         with open(path, encoding="utf-8") as f:
@@ -95,6 +98,25 @@ def _resolve_config_path(config_path: str | Path | None) -> Path | None:
     return None
 
 
+def _load_dotenv() -> None:
+    search_paths = [
+        Path.cwd() / ".env",
+        Path(os.environ.get("BI_CLI_CONFIG", "configs/bi_cli.yml")).parent / ".env",
+    ]
+    for p in search_paths:
+        if p.exists():
+            _do_load_dotenv(p)
+            break
+
+
+def _do_load_dotenv(path: Path) -> None:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(path, override=False)
+    except ImportError:
+        pass
+
+
 def _deep_merge(base: dict, override: dict) -> dict:
     result = dict(base)
     for k, v in override.items():
@@ -113,6 +135,21 @@ _ENV_MAP = {
     "BI_CLI_MODEL_TEMPERATURE": ("model", "temperature"),
     "BI_CLI_DATA_ROOT": ("data", "root"),
 }
+
+_STANDARD_ENV_KEYS = {
+    "OPENAI_API_KEY": ("model", "api_key"),
+    "ANTHROPIC_API_KEY": ("model", "api_key"),
+}
+
+
+def _apply_standard_env(raw: dict) -> dict:
+    result = _deep_merge({}, raw)
+    for env_key, path in _STANDARD_ENV_KEYS.items():
+        val = os.environ.get(env_key)
+        if val is None:
+            continue
+        _set_nested(result, path, val)
+    return result
 
 
 def _apply_env_overrides(raw: dict) -> dict:

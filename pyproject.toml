@@ -8,7 +8,9 @@ dependencies = [
     "petfishframework>=0.1.4",
     "typer>=0.12",
     "pydantic>=2.0",
-    "pyyaml>=6.0.3",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "jieba>=0.42",
 ]
 
 [project.optional-dependencies]
@@ -16,6 +18,7 @@ openai = ["petfishframework[openai]>=0.1.4"]
 anthropic = ["petfishframework[anthropic]>=0.1.4"]
 mcp = ["petfishframework[mcp]>=0.1.4"]
 data = ["pandas>=2.0"]
+sentiment = ["snownlp>=0.12"]
 web = [
     "fastapi>=0.110",
     "uvicorn>=0.29",

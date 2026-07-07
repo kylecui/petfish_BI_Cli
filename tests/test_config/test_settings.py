@@ -84,3 +84,31 @@ class TestLoadSettings:
         monkeypatch.setenv("BI_CLI_CONFIG", str(config))
         settings = load_settings()
         assert settings.model.provider == "anthropic"
+
+    def test_openai_api_key_from_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-standard-key")
+        monkeypatch.chdir(tmp_path)
+        settings = load_settings()
+        assert settings.model.api_key == "sk-standard-key"
+
+    def test_anthropic_api_key_from_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-key")
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        monkeypatch.setenv("BI_CLI_MODEL_PROVIDER", "anthropic")
+        monkeypatch.chdir(tmp_path)
+        settings = load_settings()
+        assert settings.model.api_key == "sk-ant-key"
+
+    def test_dotenv_file_loaded(self, tmp_path, monkeypatch):
+        dotenv_path = tmp_path / ".env"
+        dotenv_path.write_text("OPENAI_API_KEY=sk-from-dotenv\n", encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+        settings = load_settings()
+        assert settings.model.api_key == "sk-from-dotenv"
+
+    def test_yaml_api_key_overrides_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-from-env")
+        config = tmp_path / "bi_cli.yml"
+        config.write_text("model:\n  provider: openai\n  api_key: sk-from-yaml\n")
+        settings = load_settings(config)
+        assert settings.model.api_key == "sk-from-yaml"
