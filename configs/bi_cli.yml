@@ -1,0 +1,35 @@
+model:
+  provider: fake
+  name: fake
+  temperature: 0.0
+  max_tokens: 4096
+
+  # Uncomment for real model usage:
+  # provider: openai
+  # name: gpt-4o
+  # api_key: null              # null = read OPENAI_API_KEY env var
+  # base_url: null             # null = read OPENAI_BASE_URL env var
+  # temperature: 0.0
+  # max_tokens: 4096
+
+  # Multi-model roles (Continue/OpenHands pattern):
+  # roles:
+  #   primary:
+  #     provider: anthropic
+  #     name: claude-sonnet-4-5-20250929
+  #     temperature: 0.0
+  #   fallback:
+  #     provider: openai
+  #     name: gpt-4o-mini
+  #     temperature: 0.3
+  #   testing:
+  #     provider: fake
+
+budget:
+  max_tokens_per_session: 100000
+  max_cost_usd: 0.50
+  max_steps: 25
+
+data:
+  root: references
+  semantic_dir: references/semantic
