@@ -103,10 +103,27 @@ class PromptManager:
             if len(matched) >= 1:
                 return matched[:k]
 
+        if strategy == "embedding-similarity" and query:
+            return self._select_by_similarity(examples, query, k)
+
         if strategy == "static":
             return examples[:k]
 
         return examples[:k]
+
+    def _select_by_similarity(
+        self, examples: list[dict[str, str]], query: str, k: int
+    ) -> list[dict[str, str]]:
+        scored = []
+        query_tokens = set(_tokenize(query))
+        for ex in examples:
+            ex_tokens = set(_tokenize(ex.get("input", "")))
+            if not ex_tokens:
+                continue
+            overlap = len(query_tokens & ex_tokens) / max(len(query_tokens | ex_tokens), 1)
+            scored.append((overlap, ex))
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [ex for _, ex in scored[:k] if _ > 0]
 
     def _format_examples(self, examples: list[dict[str, str]]) -> str:
         parts: list[str] = []
@@ -130,3 +147,40 @@ def load_prompt_config(config_path: str | Path = "configs/bi_cli.yml") -> dict[s
 _DEFAULT_SYSTEM_PROMPT = """你是 BI 数据分析 Agent。你通过 Tool 获取数据，仅基于实际数据回答问题。
 不要使用模型训练数据中的知识来替代真实数据。
 每个输出中的数字必须引用 Tool 返回的 claim ID。"""
+
+
+def _tokenize(text: str) -> list[str]:
+    try:
+        import jieba
+        return [t for t in jieba.cut(text) if t.strip()]
+    except ImportError:
+        import re
+        return re.findall(r"[\w]+", text)
+
+
+class FewShotSelector:
+    """Embedding-based few-shot example selector using jieba tokenization."""
+
+    def __init__(self, examples: list[dict[str, str]] | None = None):
+        self._examples: list[dict[str, str]] = examples or []
+
+    def add(self, example: dict[str, str]) -> None:
+        self._examples.append(example)
+
+    def select(self, query: str, k: int = 3) -> list[dict[str, str]]:
+        if not self._examples or not query:
+            return []
+        query_tokens = set(_tokenize(query))
+        scored: list[tuple[float, dict[str, str]]] = []
+        for ex in self._examples:
+            ex_tokens = set(_tokenize(ex.get("input", "")))
+            if not ex_tokens:
+                continue
+            overlap = len(query_tokens & ex_tokens) / max(len(query_tokens | ex_tokens), 1)
+            scored.append((overlap, ex))
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [ex for score, ex in scored[:k] if score > 0]
+
+    @property
+    def count(self) -> int:
+        return len(self._examples)

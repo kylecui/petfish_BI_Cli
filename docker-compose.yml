@@ -1,0 +1,20 @@
+services:
+  bi-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - BI_CLI_MODEL_PROVIDER=openai
+      - BI_CLI_MODEL_NAME=gpt-4o
+      - BI_CLI_API_KEY=${BI_CLI_API_KEY}
+      - BI_CLI_API_KEY_HEADER=${BI_CLI_API_KEY_HEADER:-petfish-bi-default}
+    volumes:
+      - ./references:/app/references:ro
+      - ./outputs:/app/outputs
+      - ./configs:/app/configs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

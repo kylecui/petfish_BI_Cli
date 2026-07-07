@@ -45,6 +45,9 @@ packages = ["src/petfish_bi_cli"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "integration: requires real model API (skipped in CI without API key)",
+]
 
 [tool.ruff]
 line-length = 100
