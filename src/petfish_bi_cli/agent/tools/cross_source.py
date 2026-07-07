@@ -40,7 +40,6 @@ class CrossSourceComparisonTool:
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         sources = args.get("sources", ["jd_products", "tmall_products"])
-        metric = args.get("metric", "avg_price")
 
         stats: dict[str, dict[str, float]] = {}
         for source in sources:
@@ -73,7 +72,10 @@ class CrossSourceComparisonTool:
                 metric=f"price_diff_{s1}_vs_{s2}",
                 value=diff,
                 source="cross_source",
-                computation=f"compare({stats[s1]['avg']} - {stats[s2]['avg']}) = {diff}, pct={pct}%",
+                computation=(
+                    f"compare({stats[s1]['avg']} - {stats[s2]['avg']})"
+                    f" = {diff}, pct={pct}%"
+                ),
             )
             claims_out.append({"id": claim.id, "metric": claim.metric, "value": claim.value})
 

@@ -8,7 +8,9 @@ from petfishframework.core.contracts import ModelAdapter
 from petfish_bi_cli.sentiment.lexicon import SentimentResult
 
 SENTIMENT_PROMPT = """分析以下小红书评论的情感倾向。每条评论返回JSON：
-{"sentiment": "positive|negative|neutral", "topics": ["价格","舒适度",...], "pain_points": ["磨脚",...]}
+{"sentiment": "positive|negative|neutral",
+ "topics": ["价格","舒适度",...],
+ "pain_points": ["磨脚",...]}
 
 评论列表：
 """
