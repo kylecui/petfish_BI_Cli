@@ -1,6 +1,6 @@
 # Architecture — petfish_BI_Cli
 
-> AI for BI CLI，基于 [petfishframework](https://pypi.org/project/petfishframework/) v0.1.2。
+> AI for BI CLI，基于 [petfishframework](https://pypi.org/project/petfishframework/) v0.1.4。
 > 核心约束：规划优先 / 测试驱动 / CLI↔Web 同构。
 
 ## 1. 设计原则
@@ -118,7 +118,7 @@ class BIReport:
     status: str = "ok"                     # ok | budget_exceeded | error | parse_error
 ```
 
-> **⚠️ 框架限制（v0.1.2）**：`petfishframework.core.structured._coerce_value()` 在 line 176 调用 `isinstance(value, field_type)`。对参数化泛型（`dict[str, Any]`/`tuple[str, ...]`）会抛 `TypeError: isinstance() argument 2 cannot be a parameterized generic`，导致 `run_structured()` 返回 `StructuredResult(data=None, parse_error="...")`。
+> **⚠️ 框架限制（v0.1.4）**：`petfishframework.core.structured._coerce_value()` 在 line 176 调用 `isinstance(value, field_type)`。对参数化泛型（`dict[str, Any]`/`tuple[str, ...]`）会抛 `TypeError: isinstance() argument 2 cannot be a parameterized generic`，导致 `run_structured()` 返回 `StructuredResult(data=None, parse_error="...")`。
 > **因此核心域模型一律用非参数化类型**（`dict` 而非 `dict[str, Any]`、`tuple` 而非 `tuple[str, ...]`）。当框架修复此限制后可恢复参数化标注。详细验证见 Momus 审查 Issue #2。
 
 ### 3.3 Agent（Framework Layer，共享单例）
@@ -317,9 +317,9 @@ def test_bi_application_returns_correct_total_sales():
 
 **后果**：单进程 FastAPI 可支撑的并发受 Python GIL + LLM API rate limit 约束（通常足够）；多 worker 时升级 JobRegistry 即可，接口不变。
 
-### ADR-008: Pin petfishframework==0.1.2；框架适配层隔离
+### ADR-008: Pin petfishframework>=0.1.4；框架适配层隔离
 
-**决策**：`pyproject.toml` 固定 `petfishframework>=0.1.2,<0.2.0`。所有框架直接调用收敛到 `petfish_bi_cli/framework.py`（Agent 构建器、Session 工厂、Tool 基类 mixin）。
+**决策**：`pyproject.toml` 固定 `petfishframework>=0.1.4,<0.2.0`。所有框架直接调用收敛到 `petfish_bi_cli/framework.py`（Agent 构建器、Session 工厂、Tool 基类 mixin）。
 
 **理由**：框架处于 Alpha，API 可能变。集中适配点让升级可控。
 

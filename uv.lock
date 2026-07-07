@@ -355,6 +355,22 @@ wheels = [
 ]
 
 [[package]]
+name = "fastapi"
+version = "0.139.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "annotated-doc" },
+    { name = "pydantic" },
+    { name = "starlette" },
+    { name = "typing-extensions" },
+    { name = "typing-inspection" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/af/a5f50ccfa659ec1802cb4ca842c23f06d906a8cc9aef6016a2caeea3d4ed/fastapi-0.139.0.tar.gz", hash = "sha256:99ab7b2d92223c76d6cf10757ab3f89d45b38267fc20b2a136cf02f6beac3145", size = 423016, upload-time = "2026-07-01T16:35:33.436Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/7c/8e3c6ad324ea5cb36604fc3f968554887891c316d9dfde57761611d907ad/fastapi-0.139.0-py3-none-any.whl", hash = "sha256:cf15e1e9e667ddb0ad63811e60bd11390d1aac838ca4a7a23f421807b2308189", size = 130339, upload-time = "2026-07-01T16:35:32.19Z" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1152,6 +1168,7 @@ data = [
     { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 dev = [
+    { name = "httpx" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -1164,31 +1181,38 @@ mcp = [
 openai = [
     { name = "petfishframework", extra = ["openai"] },
 ]
+web = [
+    { name = "fastapi" },
+    { name = "uvicorn" },
+]
 
 [package.metadata]
 requires-dist = [
+    { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.110" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pandas", marker = "extra == 'data'", specifier = ">=2.0" },
-    { name = "petfishframework", specifier = ">=0.1.2" },
-    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=0.1.2" },
-    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=0.1.2" },
-    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=0.1.2" },
+    { name = "petfishframework", specifier = ">=0.1.4" },
+    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=0.1.4" },
+    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=0.1.4" },
+    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=0.1.4" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
     { name = "python-dotenv", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
     { name = "typer", specifier = ">=0.12" },
+    { name = "uvicorn", marker = "extra == 'web'", specifier = ">=0.29" },
 ]
-provides-extras = ["openai", "anthropic", "mcp", "data", "dev"]
+provides-extras = ["openai", "anthropic", "mcp", "data", "web", "dev"]
 
 [[package]]
 name = "petfishframework"
-version = "0.1.2"
+version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5a/f6/3fce0e43cd0015b75fc38890758fa22563faae4781a35b0083a46453f3c8/petfishframework-0.1.2.tar.gz", hash = "sha256:3017613c058a381683170bc149f14a7d77ba6350b32edc967d9bc6684db1b4ed", size = 270664, upload-time = "2026-07-06T10:04:27.207Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8f/94/2d5a34e300609ab8e57d94a36fad5825c7cb4a1b63fb334e30181322fbce/petfishframework-0.1.4.tar.gz", hash = "sha256:d2c1121dceac469fef830e2c2391b347d9237591ffd592d633293f94bfb55b20", size = 283986, upload-time = "2026-07-07T09:35:27.322Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/ed/c6945c175cc1fe7375b9dc8b76686e8dad2c4d0d523f8d1b169fb44812f0/petfishframework-0.1.2-py3-none-any.whl", hash = "sha256:8850fe7ee5b59ab05c6fe7e7f14dc5fd2a9f1507ad44a696df23bbcc090e31ff", size = 72932, upload-time = "2026-07-06T10:04:25.928Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/3d/64638aac7fc52ae7b21638f6401d205b86c61f9c323f455ab4a6673bb267/petfishframework-0.1.4-py3-none-any.whl", hash = "sha256:6d10eecb26f8b33418f6f26dfb84ac4acb23251eb231e81941aec62183ef6012", size = 73957, upload-time = "2026-07-07T09:35:26.028Z" },
 ]
 
 [package.optional-dependencies]
@@ -1971,8 +1995,8 @@ name = "uvicorn"
 version = "0.50.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "python_full_version < '3.11' or sys_platform != 'emscripten'" },
-    { name = "h11", marker = "python_full_version < '3.11' or sys_platform != 'emscripten'" },
+    { name = "click" },
+    { name = "h11" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9f/f6/cc9aadc0e481344a42095d222bfa764122fb8cfba708d1922917bd8bfb01/uvicorn-0.50.2.tar.gz", hash = "sha256:b92bf03509b82bcb9d49e7335b4fd364518ad021c2dc18b4e6a2fec8c955a0bb", size = 93716, upload-time = "2026-07-06T10:38:31.984Z" }

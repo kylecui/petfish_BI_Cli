@@ -579,7 +579,7 @@ class OutputValidator:
 
 **后果**：框架升级时（v0.2+），如果 `_system_prompt()` 签名变了，只需改一个方法。适配层集中在 `strategy.py`。
 
-**已知风险**：Anthropic adapter（`anthropic.py:145-156`）在 v0.1.2 丢弃 tool descriptions。如果用 Claude，Tool 描述要在 system prompt 中显式重复。
+**已知风险**：Anthropic adapter（`anthropic.py:145-156`）在 v0.1.4 丢弃 tool descriptions。如果用 Claude，Tool 描述要在 system prompt 中显式重复。
 
 ## 8. 目录结构（新增）
 
