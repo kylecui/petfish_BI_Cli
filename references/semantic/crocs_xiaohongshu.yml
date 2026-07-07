@@ -1,0 +1,66 @@
+source_id: crocs_xiaohongshu
+source_type: csv
+file_pattern: "CROCS_*.csv"
+description: "小红书 CROCS 相关笔记与评论数据（用户生成内容，舆情/反馈分析用）"
+
+schema:
+  columns:
+    - name: 搜索关键词
+      aliases: [search_keyword, keyword]
+      type: string
+      description: "小红书搜索关键词"
+    - name: 笔记标题
+      aliases: [note_title, title]
+      type: string
+    - name: 博主名
+      aliases: [blogger, author]
+      type: string
+    - name: 笔记发布时间
+      aliases: [note_date, publish_time]
+      type: string
+      format: "编辑于 MM-DD 或 YYYY-MM-DD"
+    - name: 采集时间
+      aliases: [crawl_time, collected_at]
+      type: datetime
+    - name: 评论人昵称
+      aliases: [commenter, commenter_name]
+      type: string
+    - name: 评论内容
+      aliases: [comment, comment_text]
+      type: string
+      description: "用户评论原文——舆情分析的核心字段"
+    - name: 评论时间
+      aliases: [comment_time]
+      type: datetime
+    - name: 是否近3天新增
+      aliases: [is_new_3d, is_recent]
+      type: boolean
+      empty_marker: "无"
+
+entities:
+  - name: brand
+    values: ["CROCS", "卡骆驰"]
+    source_column: 搜索关键词
+  - name: sentiment_topic
+    extractable_from: 评论内容
+    examples: ["磨脚", "硬", "云朵", "好看", "好穿", "贵", "便宜", "平替", "舒服", "磨脚", "臭脚"]
+
+metrics:
+  - name: comment_count
+    aliases: [评论数, 评论量]
+    aggregation: count
+    source_column: 评论内容
+    filter: "评论内容 != '无' AND 评论内容 != ''"
+  - name: note_count
+    aliases: [笔记数]
+    aggregation: count_distinct
+    source_column: 笔记标题
+  - name: positive_mention_count
+    description: "正面提及数（需 sentiment 判定，M2 阶段实现）"
+    compute: "COUNT(评论内容 WHERE sentiment = positive)"
+
+example_questions:
+  - "用户对CROCS云朵款的评价如何？"
+  - "最常见的投诉是什么？"
+  - "CROCS的平替讨论多吗？"
+  - "近3天新增评论趋势？"

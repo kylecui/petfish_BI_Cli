@@ -1,0 +1,35 @@
+entities:
+  - name: brand
+    aliases: [品牌, brand_name, manufacturer]
+    values:
+      CROCS: [CROCS, Crocs, crocs, 卡骆驰]
+      HUGO_BOSS: [HUGO BOSS, BOSS, 雨果博斯, hugo boss]
+      ADIDAS: [Adidas, adidas, 阿迪达斯, ADIDAS]
+      ANTA: [Anta, 安踏, ANTA]
+      UGG: [UGG, ugg]
+      NIKE: [Nike, nike, 耐克, NIKE]
+      PUMA: [Puma, puma, 彪马]
+      SKECHERS: [Skechers, 斯凯奇]
+      BIRKENSTOCK: [Birkenstock, 勃肯鞋]
+      VANS: [Vans, 范斯]
+
+  - name: platform
+    aliases: [平台, channel, marketplace]
+    values:
+      JD: [JD, 京东, jd, 京东商城]
+      TMALL: [TMALL, 天猫, tmall, 天猫商城]
+
+  - name: metric
+    aliases: [指标, KPI, measure]
+    types:
+      - {name: price, aliases: [价格, 单价, amount], aggregation: avg, unit: CNY}
+      - {name: original_price, aliases: [原价, list_price], aggregation: avg, unit: CNY}
+      - {name: final_price, aliases: [实付价, 到手价], aggregation: avg, unit: CNY}
+      - {name: comment_count, aliases: [评论数, 评论量], aggregation: count}
+      - {name: note_count, aliases: [笔记数], aggregation: count_distinct}
+      - {name: shop_count, aliases: [店铺数], aggregation: count_distinct}
+      - {name: product_count, aliases: [商品数], aggregation: count}
+      - {name: discount_amount, aliases: [折扣金额], aggregation: avg, unit: CNY}
+
+  - name: intent
+    types: [lookup, comparison, trend, ranking, sentiment, distribution]

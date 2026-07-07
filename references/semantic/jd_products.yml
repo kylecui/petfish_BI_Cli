@@ -1,0 +1,76 @@
+source_id: jd_products
+source_type: json
+file_pattern: "JD_CROCS_Raw_Memory_Dump.json"
+description: "京东 CROCS 商品列表（价格、优惠券、库存、店铺信息）"
+
+schema:
+  json_path: "raw_data.search_results[]"
+  columns:
+    - name: skuId
+      type: string
+      description: "京东商品 SKU ID"
+    - name: skuName
+      aliases: [product_name, title]
+      type: string
+    - name: isJdSelf
+      aliases: [is_self, jd_self]
+      type: boolean
+      description: "是否京东自营"
+    - name: shopName
+      aliases: [shop, store]
+      type: string
+    - name: originalPrice
+      aliases: [原价, list_price]
+      type: float
+      unit: CNY
+    - name: calculatedFinalPrice
+      aliases: [final_price, 实付价, 到手价]
+      type: float
+      unit: CNY
+      description: "考虑优惠券后的实付价格"
+    - name: stockState
+      type: int
+      description: "库存状态码"
+    - name: coupons
+      type: array
+      description: "优惠券列表，每项含 type/desc/discount"
+
+entities:
+  - name: brand
+    values: ["CROCS", "卡骆驰"]
+    source_column: skuName
+  - name: platform
+    values: ["JD", "京东"]
+  - name: shop_type
+    extractable_from: isJdSelf
+    mapping: {true: "京东自营", false: "第三方"}
+
+metrics:
+  - name: avg_price
+    aliases: [均价, 平均价格]
+    aggregation: avg
+    source_column: calculatedFinalPrice
+    unit: CNY
+  - name: min_price
+    aliases: [最低价]
+    aggregation: min
+    source_column: calculatedFinalPrice
+    unit: CNY
+  - name: max_price
+    aliases: [最高价]
+    aggregation: max
+    source_column: calculatedFinalPrice
+    unit: CNY
+  - name: product_count
+    aliases: [商品数]
+    aggregation: count
+  - name: discount_amount
+    aliases: [折扣金额]
+    compute: "originalPrice - calculatedFinalPrice"
+    unit: CNY
+
+example_questions:
+  - "CROCS在京东的价格范围？"
+  - "京东自营和第三方哪个便宜？"
+  - "CROCS京东均价是多少？"
+  - "京东上CROCS有几款商品？"

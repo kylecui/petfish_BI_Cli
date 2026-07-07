@@ -1,0 +1,89 @@
+source_id: rose_10brands
+source_type: jsonl
+file_pattern: "ROSE_10BRANDS_Raw_Dump.json"
+description: "ROSE 10+品牌价格情报（跨品牌横评，含 JD+TMALL 数据）"
+
+schema:
+  jsonl_structure:
+    each_line: "timestamp + source_url + extracted_items[] + raw_response"
+    items_path: "extracted_items[]"
+  item_columns:
+    - name: itemId
+      type: string
+    - name: original_price
+      aliases: [原价]
+      type: float
+      unit: CNY
+    - name: show_price
+      type: float
+      unit: CNY
+      description: "展示价格"
+    - name: ump_price
+      aliases: [到手价, final_price]
+      type: float
+      unit: CNY
+      description: "实际到手价（营销活动后）"
+    - name: price_desc
+      type: string
+      description: "价格描述文字"
+    - name: title
+      aliases: [product_name]
+      type: string
+    - name: shop
+      aliases: [shop_name, store]
+      type: string
+
+entities:
+  - name: brand
+    extractable_from: title
+    extraction: "title 中匹配 known_values（大小写不敏感）"
+    known_values:
+      - CROCS
+      - HUGO BOSS
+      - BOSS
+      - Adidas
+      - Anta
+      - UGG
+      - Nike
+      - Puma
+      - Skechers
+      - Birkenstock
+      - Vans
+      - New Balance
+      - FILA
+      - Li Ning
+      - Peak
+  - name: platform
+    note: "ROSE 数据源 URL 含 jd.com 和 taobao.com，需从 source_url 提取"
+    extractable_from: source_url
+    extraction: "url 含 'jd.com' → JD；url 含 'taobao.com' 或 'tmall' → TMALL"
+
+metrics:
+  - name: avg_price
+    aliases: [均价]
+    aggregation: avg
+    source_column: ump_price
+    unit: CNY
+  - name: min_price
+    aliases: [最低价]
+    aggregation: min
+    source_column: ump_price
+    unit: CNY
+  - name: max_price
+    aliases: [最高价]
+    aggregation: max
+    source_column: ump_price
+    unit: CNY
+  - name: brand_count
+    aliases: [品牌数]
+    aggregation: count_distinct
+    source_column: brand
+  - name: product_count
+    aliases: [商品数]
+    aggregation: count
+
+example_questions:
+  - "10个品牌的价格排名？"
+  - "哪个品牌价格波动最大？"
+  - "CROCS在10品牌中的价格分位？"
+  - "各品牌平均到手价对比？"

@@ -1,0 +1,6 @@
+User: CROCS 在京东卖多少钱？
+Thought: 需要加载 JD 商品价格数据
+Action: load_data(source="jd_products", metric="avg_price")
+Observation: {"claims": [{"id": "c1", "metric": "avg_price", "value": 424.0}], "metadata": {"source": "jd_products", "row_count": 2}}
+Thought: JD 均价 424.0 元，来自 2 条商品记录。
+Final Answer: {"answer": "CROCS在京东的均价为424.0元", "data": {"findings": [{"metric": "avg_price", "value": 424.0, "claim_id": "c1"}]}, "status": "ok"}

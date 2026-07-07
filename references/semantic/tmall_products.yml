@@ -1,0 +1,61 @@
+source_id: tmall_products
+source_type: jsonl
+file_pattern: "TMALL_CROCS_Raw_Memory_Dump.json"
+description: "天猫 CROCS 商品列表（API 抓取 dump，价格/店铺分析用）"
+
+schema:
+  jsonl_structure:
+    each_line: "timestamp + source_url + extracted_items[] + raw_response"
+    items_path: "extracted_items[]"
+  item_columns:
+    - name: itemId
+      type: string
+    - name: price
+      type: float
+      note: "字符串存储，需 cast 为 float"
+      unit: CNY
+    - name: title
+      aliases: [product_name]
+      type: string
+    - name: shop
+      aliases: [shop_name, store]
+      type: string
+
+entities:
+  - name: brand
+    values: ["CROCS", "卡骆驰", "Crocs"]
+    source_column: title
+  - name: platform
+    values: ["TMALL", "天猫"]
+  - name: shop
+    source_column: shop
+
+metrics:
+  - name: avg_price
+    aliases: [均价, 平均价格]
+    aggregation: avg
+    source_column: price
+    unit: CNY
+  - name: min_price
+    aliases: [最低价]
+    aggregation: min
+    source_column: price
+    unit: CNY
+  - name: max_price
+    aliases: [最高价]
+    aggregation: max
+    source_column: price
+    unit: CNY
+  - name: shop_count
+    aliases: [店铺数]
+    aggregation: count_distinct
+    source_column: shop
+  - name: product_count
+    aliases: [商品数]
+    aggregation: count
+
+example_questions:
+  - "天猫上CROCS有几家店在卖？"
+  - "天猫CROCS的平均价格？"
+  - "天猫CROCS价格分布？"
+  - "哪家店最便宜？"

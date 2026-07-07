@@ -1,0 +1,12 @@
+User: CROCS 在京东和天猫的价格差异
+Thought: 需要 JD 和 TMALL 的 CROCS 价格数据
+Action: load_data(source="jd_products", metric="avg_price")
+Observation: {"claims": [{"id": "c1", "metric": "avg_price", "value": 424.0}]}
+Thought: JD 均价 424.0。现在需要 TMALL 数据
+Action: load_data(source="tmall_products", metric="avg_price")
+Observation: {"claims": [{"id": "c2", "metric": "avg_price", "value": 407.01}]}
+Thought: TMALL 均价 407.01。现在做对比
+Action: analyze(operation="compare")
+Observation: {"id": "c3", "metric": "price_diff", "value": 16.99, "computation": "compare(424.0 - 407.01) = 16.99, pct=4.2%"}
+Thought: JD 比 TMALL 贵 16.99 元（4.2%）。所有数字有 claim 支撑。
+Final Answer: {"answer": "CROCS在京东均价424.0元，天猫407.01元，京东贵4.2%", "data": {"findings": [{"metric": "jd_avg_price", "value": 424.0, "claim_id": "c1"}, {"metric": "tmall_avg_price", "value": 407.01, "claim_id": "c2"}, {"metric": "price_diff", "value": 16.99, "claim_id": "c3"}]}, "status": "ok"}

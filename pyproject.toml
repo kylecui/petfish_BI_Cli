@@ -8,6 +8,7 @@ dependencies = [
     "petfishframework>=0.1.4",
     "typer>=0.12",
     "pydantic>=2.0",
+    "pyyaml>=6.0.3",
 ]
 
 [project.optional-dependencies]
