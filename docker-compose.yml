@@ -1,13 +1,23 @@
 services:
-  bi-api:
+  bi-cli:
     build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.siliconflow.cn/v1}
+    volumes:
+      - ./references:/app/references:ro
+      - ./outputs:/app/outputs
+      - ./configs:/app/configs:ro
+    profiles: ["cli"]
+
+  bi-web:
+    build: .
+    command: ["uv", "run", "uvicorn", "petfish_bi_cli.web:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8000:8000"
     environment:
-      - BI_CLI_MODEL_PROVIDER=openai
-      - BI_CLI_MODEL_NAME=gpt-4o
-      - BI_CLI_API_KEY=${BI_CLI_API_KEY}
-      - BI_CLI_API_KEY_HEADER=${BI_CLI_API_KEY_HEADER:-petfish-bi-default}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.siliconflow.cn/v1}
     volumes:
       - ./references:/app/references:ro
       - ./outputs:/app/outputs
@@ -18,3 +28,4 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    profiles: ["web"]

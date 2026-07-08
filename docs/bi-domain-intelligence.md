@@ -451,7 +451,7 @@ Thought: JD 比 TMALL 贵 81.99 元（20.1%）。所有数字有 claim 支撑。
 Final Answer: {"answer": "CROCS在京东均价489.0元，天猫407.01元，京东贵20.1%", "data": {"findings": [{"metric": "jd_avg_price", "value": 489.0, "claim_id": "c1"}, {"metric": "tmall_avg_price", "value": 407.01, "claim_id": "c2"}, {"metric": "price_diff", "value": 81.99, "claim_id": "c3"}]}, "status": "ok"}
 ```
 
-## 6. Grounding by Construction
+## 6. Structured Traceability（每个数字可追溯到 raw data 行）
 
 ### 6.1 ClaimsLedger 设计
 
@@ -592,11 +592,11 @@ class BIApplication:
 
 **后果**：system prompt 必须包含语义层摘要（数据源 + 实体 + 指标），让 Agent 知道有哪些 Tool 和数据可用。
 
-### ADR-012: Grounding by Construction — LLM 看 metadata 不看 raw data
+### ADR-012: Structured Traceability — LLM 看 metadata 不看 raw data
 
 **决策**：所有 Tool 的 `execute()` 返回 `ClaimsLedger`（带 ID 的 claims + 统计 metadata），不返回原始记录。LLM 只能引用 claim ID。
 
-**理由**：TRACE / StatGuard 研究证明，让 LLM 看到 raw data 是幻觉的主要来源。从结构上限制 LLM 只看 metadata + claim IDs，比靠 prompt"不要编"有效 10 倍。
+**理由**：TRACE / StatGuard 研究证明，让 LLM 看到 raw data 是幻觉的主要来源。从结构上限制 LLM 只看 metadata + claim IDs，比靠 prompt"不要编"更有效。注意：ClaimsLedger 保证 provenance（出处可追溯），不保证 truthfulness（解读正确）。模型仍可能误读 raw data——validator 做的是结构性校验（数字匹配），不是语义校验。
 
 **后果**：Tool 层需要确定性计算逻辑（pandas/DuckDB），不能简单返回 CSV 行。`AnalysisTool` 是确定性计算引擎，不是 LLM 生成代码。
 

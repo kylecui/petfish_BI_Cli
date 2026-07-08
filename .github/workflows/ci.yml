@@ -28,7 +28,8 @@ jobs:
         run: uv run ruff format --check src/ tests/
 
       - name: Mypy type check
-        run: uv run mypy src/ || true
+        run: uv run mypy src/ --ignore-missing-imports --no-error-summary
+        continue-on-error: true
 
       - name: Pytest
         run: uv run pytest tests/ -v --tb=short -x -m "not integration"
