@@ -5,7 +5,7 @@ description = "AI for BI CLI — processes e-commerce raw data and returns JSON 
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "petfishframework>=0.1.4",
+    "petfishframework>=0.3.3",
     "typer>=0.12",
     "pydantic>=2.0",
     "python-dotenv>=1.0",
@@ -14,9 +14,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openai = ["petfishframework[openai]>=0.1.4"]
-anthropic = ["petfishframework[anthropic]>=0.1.4"]
-mcp = ["petfishframework[mcp]>=0.1.4"]
+openai = ["petfishframework[openai]>=0.3.3"]
+anthropic = ["petfishframework[anthropic]>=0.3.3"]
+mcp = ["petfishframework[mcp]>=0.3.3"]
 data = ["pandas>=2.0"]
 sentiment = ["snownlp>=0.12"]
 web = [

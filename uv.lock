@@ -1205,10 +1205,10 @@ requires-dist = [
     { name = "jieba", specifier = ">=0.42" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pandas", marker = "extra == 'data'", specifier = ">=2.0" },
-    { name = "petfishframework", specifier = ">=0.1.4" },
-    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=0.1.4" },
-    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=0.1.4" },
-    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=0.1.4" },
+    { name = "petfishframework", specifier = ">=0.3.3" },
+    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=0.3.3" },
+    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=0.3.3" },
+    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=0.3.3" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
@@ -1224,11 +1224,14 @@ provides-extras = ["openai", "anthropic", "mcp", "data", "sentiment", "web", "de
 
 [[package]]
 name = "petfishframework"
-version = "0.1.4"
+version = "0.3.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8f/94/2d5a34e300609ab8e57d94a36fad5825c7cb4a1b63fb334e30181322fbce/petfishframework-0.1.4.tar.gz", hash = "sha256:d2c1121dceac469fef830e2c2391b347d9237591ffd592d633293f94bfb55b20", size = 283986, upload-time = "2026-07-07T09:35:27.322Z" }
+dependencies = [
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/81/031fd620d9ab5edb4e5605c6eaff66256a6c2d749102214dbeb233e92496/petfishframework-0.3.3.tar.gz", hash = "sha256:16b6fc1aa0c6b49f957f970a8dd5e0dd6320d5af22a4321c831014ef7a319dd3", size = 394922, upload-time = "2026-07-08T05:34:32.893Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/3d/64638aac7fc52ae7b21638f6401d205b86c61f9c323f455ab4a6673bb267/petfishframework-0.1.4-py3-none-any.whl", hash = "sha256:6d10eecb26f8b33418f6f26dfb84ac4acb23251eb231e81941aec62183ef6012", size = 73957, upload-time = "2026-07-07T09:35:26.028Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/42/2f3c54c247a28189edf793a5a60466d6305d8a96b29deb257ff398f87245/petfishframework-0.3.3-py3-none-any.whl", hash = "sha256:9db7226b8d94f76c900de4445107bf3eb5cacd0bacd9577552f5e6a616edbb71", size = 90440, upload-time = "2026-07-08T05:34:31.181Z" },
 ]
 
 [package.optional-dependencies]
