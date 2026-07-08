@@ -39,19 +39,41 @@ JSON report (must-have) + rich content (nice-to-have)
 
 ## Quick Start
 
+本项目已验证 SiliconFlow Qwen2.5-72B-Instruct 模型。以下是实际可用的配置方式。
+
+### 方式一：SiliconFlow Qwen2.5-72B（已验证）
+
 ```bash
-# 安装（开发模式）
+# 1. 安装
 uv sync --extra dev --extra openai
 
-# 配置模型 API key
-export OPENAI_API_KEY="sk-..."
+# 2. 配置 .env（从 .env.example 复制后填写）
+cp .env.example .env
+# 编辑 .env：
+#   OPENAI_API_KEY=sk-your-siliconflow-key
+#   OPENAI_BASE_URL=https://api.siliconflow.cn/v1
 
-# 运行
-uv run petfish-bi "CROCS 在京东和天猫的价格差异分析"
+# 3. 配置 configs/bi_cli.yml
+# 编辑 model.name 为 Qwen/Qwen2.5-72B-Instruct
 
-# 测试（用 FakeModel，无需 API key）
+# 4. 运行
+uv run petfish-bi ask "CROCS在京东的均价是多少？"
+
+# 5. 测试（FakeModel，无需 API key）
 uv run pytest
 ```
+
+### 方式二：OpenAI GPT-4o（未验证但应兼容）
+
+```bash
+uv sync --extra dev --extra openai
+export OPENAI_API_KEY="sk-..."
+uv run petfish-bi ask "CROCS在京东的均价是多少？"
+```
+
+### 样例输出
+
+查看 `outputs/sample-*.json` 了解真实查询的 JSON 报告格式。
 
 ## Development
 

@@ -45,7 +45,15 @@ class LoadDataTool:
         self._registry = registry
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
-        source = args["source"]
+        source = args.get("source", "")
+        if not source:
+            return ToolResult(
+                value={"error": "Missing 'source' parameter"},
+                error=(
+                    "Missing 'source'. "
+                    "Use explore_data_sources to see available sources."
+                ),
+            )
         metric = args.get("metric", "avg_price")
 
         if source == "crocs_xiaohongshu":
