@@ -12,6 +12,17 @@ from petfish_bi_cli.ingestion.crocs import parse_crocs_csv
 from petfish_bi_cli.ingestion.jd import ProductRecord
 from petfish_bi_cli.ingestion.tmall import parse_rose_jsonl, parse_tmall_jsonl
 
+_SOURCE_ALIASES = {
+    "crocs": "crocs_xiaohongshu",
+    "xiaohongshu": "crocs_xiaohongshu",
+    "小红书": "crocs_xiaohongshu",
+    "jd": "jd_products",
+    "京东": "jd_products",
+    "tmall": "tmall_products",
+    "天猫": "tmall_products",
+    "rose": "rose_10brands",
+}
+
 _SOURCE_FILES = {
     "jd_products": "JD_CROCS_Raw_Memory_Dump.json",
     "tmall_products": "TMALL_CROCS_Raw_Memory_Dump.json",
@@ -46,6 +57,7 @@ class LoadDataTool:
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         source = args.get("source", "")
+        source = _SOURCE_ALIASES.get(source, source)
         if not source:
             return ToolResult(
                 value={"error": "Missing 'source' parameter"},

@@ -5,8 +5,12 @@ from pathlib import Path
 from petfishframework import Agent
 
 from petfish_bi_cli.agent.strategy import BIAgentStrategy
+from petfish_bi_cli.agent.tools.cross_source import CrossSourceComparisonTool
+from petfish_bi_cli.agent.tools.cross_time import CrossTimeTool
 from petfish_bi_cli.agent.tools.explore import ExploreDataSourcesTool
 from petfish_bi_cli.agent.tools.load import LoadDataTool
+from petfish_bi_cli.agent.tools.sentiment import SentimentAnalysisTool
+from petfish_bi_cli.agent.tools.trend import TrendTool
 from petfish_bi_cli.config.model_factory import build_model
 from petfish_bi_cli.config.settings import Settings, load_settings
 from petfish_bi_cli.grounding.claims import ClaimsRegistry
@@ -33,8 +37,18 @@ def make_bi_agent(
 
     explore = ExploreDataSourcesTool(semantic_dir=semantic_dir)
     load = LoadDataTool(data_root=data_root, registry=registry)
+    sentiment = SentimentAnalysisTool(
+        data_root=data_root, registry=registry
+    )
+    trend = TrendTool(data_root=data_root, registry=registry)
+    cross_source = CrossSourceComparisonTool(
+        data_root=data_root, registry=registry
+    )
+    cross_time = CrossTimeTool(data_root=data_root, registry=registry)
 
-    all_tools = (explore, load) + tools
+    all_tools = (
+        explore, load, sentiment, trend, cross_source, cross_time,
+    ) + tools
     return Agent(
         model=model,
         reasoning=BIAgentStrategy(),
