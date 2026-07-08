@@ -5,8 +5,25 @@ import re
 from petfish_bi_cli.grounding.claims import ClaimsLedger, ValidationResult
 
 COMMON_UNITS = {
-    "元", "万元", "分", "个", "条", "件", "家", "款", "双", "瓶",
-    "%", "倍", "天", "周", "月", "年", "次", "人", "类",
+    "元",
+    "万元",
+    "分",
+    "个",
+    "条",
+    "件",
+    "家",
+    "款",
+    "双",
+    "瓶",
+    "%",
+    "倍",
+    "天",
+    "周",
+    "月",
+    "年",
+    "次",
+    "人",
+    "类",
 }
 
 
@@ -50,9 +67,7 @@ def validate_report(
                     if _values_match(val, claim_metrics[metric].value):
                         matched = True
                 if not matched:
-                    errors.append(
-                        f"Finding {i}: unverified value {val} for metric '{metric}'"
-                    )
+                    errors.append(f"Finding {i}: unverified value {val} for metric '{metric}'")
 
     numbers = re.findall(r"\d+\.?\d*", report_answer)
     for num in numbers:
@@ -63,7 +78,8 @@ def validate_report(
 
     if isinstance(findings, list) and len(findings) > 0:
         findings_with_claims = sum(
-            1 for f in findings
+            1
+            for f in findings
             if isinstance(f, dict) and f.get("claim_id") and f.get("claim_id") in claim_map
         )
         coverage = findings_with_claims / len(findings) if findings else 0
@@ -90,7 +106,7 @@ def _is_unit_context(text: str, num: str) -> bool:
     idx = text.find(num)
     if idx < 0:
         return False
-    after = text[idx + len(num):idx + len(num) + 4]
+    after = text[idx + len(num) : idx + len(num) + 4]
     for unit in COMMON_UNITS:
         if after.startswith(unit):
             return False

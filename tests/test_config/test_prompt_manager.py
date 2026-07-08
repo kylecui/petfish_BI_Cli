@@ -10,9 +10,11 @@ class TestPromptManager:
         prompt_file = tmp_path / "prompt.md"
         prompt_file.write_text("You are a BI agent. Version 2.", encoding="utf-8")
 
-        mgr = PromptManager({
-            "system_prompt": {"file": str(prompt_file)},
-        })
+        mgr = PromptManager(
+            {
+                "system_prompt": {"file": str(prompt_file)},
+            }
+        )
         assert "BI agent" in mgr.load_system_prompt()
 
     def test_returns_default_when_file_missing(self):
@@ -47,14 +49,16 @@ class TestPromptManager:
             encoding="utf-8",
         )
 
-        mgr = PromptManager({
-            "few_shot": {
-                "mode": "static",
-                "pool_dir": str(pool_dir),
-                "k": 3,
-                "selection": "intent-first",
-            },
-        })
+        mgr = PromptManager(
+            {
+                "few_shot": {
+                    "mode": "static",
+                    "pool_dir": str(pool_dir),
+                    "k": 3,
+                    "selection": "intent-first",
+                },
+            }
+        )
         result = mgr.select_few_shot("query")
         assert len(result) > 0
 
@@ -70,14 +74,16 @@ class TestPromptManager:
             encoding="utf-8",
         )
 
-        mgr = PromptManager({
-            "few_shot": {
-                "mode": "dynamic",
-                "pool_dir": str(pool_dir),
-                "k": 1,
-                "selection": "intent-first",
-            },
-        })
+        mgr = PromptManager(
+            {
+                "few_shot": {
+                    "mode": "dynamic",
+                    "pool_dir": str(pool_dir),
+                    "k": 1,
+                    "selection": "intent-first",
+                },
+            }
+        )
         result = mgr.select_few_shot("query", intent="comparison")
         assert "compare" in result
 

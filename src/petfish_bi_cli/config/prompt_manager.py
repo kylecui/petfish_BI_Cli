@@ -76,18 +76,22 @@ class PromptManager:
                 if file_path.suffix in (".yaml", ".yml"):
                     parsed = yaml.safe_load(content)
                     if isinstance(parsed, dict):
-                        examples.append({
-                            "input": parsed.get("input", ""),
-                            "output": parsed.get("output", ""),
-                            "intent": parsed.get("intent", ""),
-                        })
+                        examples.append(
+                            {
+                                "input": parsed.get("input", ""),
+                                "output": parsed.get("output", ""),
+                                "intent": parsed.get("intent", ""),
+                            }
+                        )
                 else:
                     intent_tag = file_path.stem
-                    examples.append({
-                        "input": content,
-                        "output": "",
-                        "intent": intent_tag,
-                    })
+                    examples.append(
+                        {
+                            "input": content,
+                            "output": "",
+                            "intent": intent_tag,
+                        }
+                    )
         return examples
 
     def _select(
@@ -152,24 +156,78 @@ _DEFAULT_SYSTEM_PROMPT = """你是 BI 数据分析 Agent。你通过 Tool 获取
 def _tokenize(text: str) -> list[str]:
     try:
         import jieba
+
         return [t for t in jieba.cut(text) if t.strip()]
     except ImportError:
         import re
+
         return re.findall(r"[\w]+", text)
 
 
 class FewShotSelector:
-    """Embedding-based few-shot example selector using jieba tokenization."""
+    """Few-shot example selector with intent-first and keyword similarity modes."""
 
-    def __init__(self, examples: list[dict[str, str]] | None = None):
+    def __init__(
+        self,
+        pool_dir: Path | str | None = None,
+        examples: list[dict[str, str]] | None = None,
+        strategy: str = "intent",
+    ):
+        self._strategy = strategy
         self._examples: list[dict[str, str]] = examples or []
+        if pool_dir:
+            self._load_pool(Path(pool_dir))
+
+    def _load_pool(self, pool_dir: Path) -> None:
+        if not pool_dir.exists():
+            return
+        for ext in ("*.txt", "*.md", "*.yaml", "*.yml"):
+            for file_path in sorted(pool_dir.glob(ext)):
+                content = file_path.read_text(encoding="utf-8")
+                if file_path.suffix in (".yaml", ".yml"):
+                    parsed = yaml.safe_load(content)
+                    if isinstance(parsed, dict):
+                        self._examples.append(
+                            {
+                                "input": parsed.get("input", ""),
+                                "output": parsed.get("output", ""),
+                                "intent": parsed.get("intent", ""),
+                            }
+                        )
+                else:
+                    lines = content.strip().split("\n")
+                    intent = ""
+                    body_lines: list[str] = []
+                    for line in lines:
+                        if line.startswith("intent:"):
+                            intent = line.split(":", 1)[1].strip()
+                        else:
+                            body_lines.append(line)
+                    self._examples.append(
+                        {
+                            "input": "\n".join(body_lines),
+                            "output": "",
+                            "intent": intent or file_path.stem,
+                        }
+                    )
 
     def add(self, example: dict[str, str]) -> None:
         self._examples.append(example)
 
-    def select(self, query: str, k: int = 3) -> list[dict[str, str]]:
+    def select(self, query: str, intent: str | None = None, k: int = 3) -> str:
         if not self._examples or not query:
-            return []
+            return ""
+        if self._strategy == "intent" and intent:
+            matched = [ex for ex in self._examples if ex.get("intent") == intent]
+            if matched:
+                return self._format(matched[:k])
+        scored = self._score_by_keywords(query)
+        result = self._format([ex for score, ex in scored[:k] if score > 0])
+        if not result and self._examples:
+            result = self._format(self._examples[:k])
+        return result
+
+    def _score_by_keywords(self, query: str) -> list[tuple[float, dict[str, str]]]:
         query_tokens = set(_tokenize(query))
         scored: list[tuple[float, dict[str, str]]] = []
         for ex in self._examples:
@@ -179,7 +237,17 @@ class FewShotSelector:
             overlap = len(query_tokens & ex_tokens) / max(len(query_tokens | ex_tokens), 1)
             scored.append((overlap, ex))
         scored.sort(key=lambda x: x[0], reverse=True)
-        return [ex for score, ex in scored[:k] if score > 0]
+        return scored
+
+    @staticmethod
+    def _format(examples: list[dict[str, str]]) -> str:
+        parts: list[str] = []
+        for ex in examples:
+            if ex.get("output"):
+                parts.append(f"User: {ex['input']}\n{ex['output']}")
+            else:
+                parts.append(ex["input"])
+        return "\n\n".join(parts) if parts else ""
 
     @property
     def count(self) -> int:

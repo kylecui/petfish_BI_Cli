@@ -36,8 +36,9 @@ class JobRegistry:
         with self._lock:
             return self._jobs.get(job_id)
 
-    def update(self, job_id: str, status: str,
-               result: BIReport | None = None, error: str | None = None) -> None:
+    def update(
+        self, job_id: str, status: str, result: BIReport | None = None, error: str | None = None
+    ) -> None:
         with self._lock:
             job = self._jobs.get(job_id)
             if job:

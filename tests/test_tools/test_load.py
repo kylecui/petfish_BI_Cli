@@ -35,11 +35,13 @@ class TestLoadDataTool:
     def test_load_rose_with_brand_filter(self):
         reg = ClaimsRegistry()
         tool = LoadDataTool(data_root=DATA_ROOT, registry=reg)
-        result = tool.execute({
-            "source": "rose_10brands",
-            "metric": "avg_price",
-            "filters": {"brand": "BOSS"},
-        })
+        result = tool.execute(
+            {
+                "source": "rose_10brands",
+                "metric": "avg_price",
+                "filters": {"brand": "BOSS"},
+            }
+        )
         if result.error:
             result = tool.execute({"source": "rose_10brands", "metric": "avg_price"})
         assert result.error is None

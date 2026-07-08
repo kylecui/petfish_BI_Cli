@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import pytest
 
 from petfish_bi_cli.domain import BIQuery
@@ -106,6 +108,16 @@ class TestGoldenCasesWithRealModel:
 
     Run: uv run pytest tests/test_golden/test_golden_cases.py -m integration -v
     """
+
+    @pytest.fixture(autouse=True)
+    def _load_env(self):
+        from dotenv import load_dotenv
+
+        load_dotenv(override=True)
+        key = os.environ.get("BI_CLI_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if not key:
+            pytest.skip("No API key in .env or env vars")
+        yield
 
     @pytest.mark.parametrize("case", GOLDEN_CASES, ids=[c["name"] for c in GOLDEN_CASES])
     def test_golden_case(self, case):

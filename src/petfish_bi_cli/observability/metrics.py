@@ -37,6 +37,16 @@ class MetricsCollector:
         self._gauges[name] = value
         self._events.append(MetricEvent(name=name, value=value, tags=tags or {}))
 
+    def get_gauges(self) -> dict[str, float]:
+        return dict(self._gauges)
+
+    def get_events(self) -> list[MetricEvent]:
+        return list(self._events)
+
+    def record(self, name: str, value: float, tags: dict[str, str] | None = None) -> None:
+        self._events.append(MetricEvent(name=name, value=value, tags=tags or {}))
+        self._gauges[name] = value
+
     def get_counters(self) -> dict[str, int]:
         return dict(self._counters)
 
@@ -146,16 +156,15 @@ class AlertRule:
             actual_value=actual,
             threshold=self.threshold,
             severity=self.severity if triggered else "ok",
-            message=f"{self.metric}={actual:.4f} {self.comparison} {self.threshold}" if triggered else "",
+            message=f"{self.metric}={actual:.4f} {self.comparison} {self.threshold}"
+            if triggered
+            else "",
         )
 
     def _extract_value(self, metrics: MetricsCollector) -> float:
         if self.metric == "error_rate":
             total = metrics.get_counters().get("queries.total", 0)
-            errors = sum(
-                v for k, v in metrics.get_counters().items()
-                if k.startswith("error.")
-            )
+            errors = sum(v for k, v in metrics.get_counters().items() if k.startswith("error."))
             return errors / total if total > 0 else 0.0
 
         if self.metric == "p99_latency":
@@ -168,7 +177,9 @@ class AlertRule:
             return exceeded / total if total > 0 else 0.0
 
         if self.metric == "validation_failure_rate":
-            total = metrics.get_counters().get("validation.passed", 0) + metrics.get_counters().get("validation.failed", 0)
+            total = metrics.get_counters().get("validation.passed", 0) + metrics.get_counters().get(
+                "validation.failed", 0
+            )
             failed = metrics.get_counters().get("validation.failed", 0)
             return failed / total if total > 0 else 0.0
 

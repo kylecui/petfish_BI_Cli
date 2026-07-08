@@ -65,11 +65,13 @@ class TestValidateReport:
         ledger = ClaimsLedger(claims=(c1, c2, c3))
         result = validate_report(
             report_answer="JD均价489.0，TMALL均价407.01，差81.99",
-            report_data={"findings": [
-                {"value": 489.0, "claim_id": "c1"},
-                {"value": 407.01, "claim_id": "c2"},
-                {"value": 81.99, "claim_id": "c3"},
-            ]},
+            report_data={
+                "findings": [
+                    {"value": 489.0, "claim_id": "c1"},
+                    {"value": 407.01, "claim_id": "c2"},
+                    {"value": 81.99, "claim_id": "c3"},
+                ]
+            },
             claims=ledger,
         )
         assert result.valid is True

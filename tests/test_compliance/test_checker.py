@@ -131,9 +131,13 @@ class TestComplianceReport:
         cfg = ComplianceConfig()
         report = generate_compliance_report(cfg)
         expected_keys = {
-            "data_retention_days", "user_consent_required",
-            "cross_border_transfer", "data_locality",
-            "pii_redaction", "audit_log_enabled",
-            "log_retention_days", "status",
+            "data_retention_days",
+            "user_consent_required",
+            "cross_border_transfer",
+            "data_locality",
+            "pii_redaction",
+            "audit_log_enabled",
+            "log_retention_days",
+            "status",
         }
         assert set(report.keys()) == expected_keys

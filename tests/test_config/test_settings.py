@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from petfish_bi_cli.config.settings import (
     load_settings,
 )
@@ -63,9 +65,7 @@ class TestLoadSettings:
 
     def test_data_config(self, tmp_path):
         config = tmp_path / "bi_cli.yml"
-        config.write_text(
-            "data:\n  root: /custom/data\n  semantic_dir: /custom/sem\n"
-        )
+        config.write_text("data:\n  root: /custom/data\n  semantic_dir: /custom/sem\n")
         settings = load_settings(config)
         assert settings.data.root == "/custom/data"
         assert settings.data.semantic_dir == "/custom/sem"
@@ -99,6 +99,7 @@ class TestLoadSettings:
         settings = load_settings()
         assert settings.model.api_key == "sk-ant-key"
 
+    @pytest.mark.dotenv
     def test_dotenv_file_loaded(self, tmp_path, monkeypatch):
         dotenv_path = tmp_path / ".env"
         dotenv_path.write_text("OPENAI_API_KEY=sk-from-dotenv\n", encoding="utf-8")

@@ -73,8 +73,7 @@ class CrossSourceComparisonTool:
                 value=diff,
                 source="cross_source",
                 computation=(
-                    f"compare({stats[s1]['avg']} - {stats[s2]['avg']})"
-                    f" = {diff}, pct={pct}%"
+                    f"compare({stats[s1]['avg']} - {stats[s2]['avg']}) = {diff}, pct={pct}%"
                 ),
             )
             claims_out.append({"id": claim.id, "metric": claim.metric, "value": claim.value})

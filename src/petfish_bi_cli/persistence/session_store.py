@@ -19,10 +19,7 @@ class SessionStore:
         emitter = getattr(session, "_emitter", None)
         if emitter is not None:
             raw_events = getattr(emitter, "_events", [])
-            events = [
-                e.to_dict() if hasattr(e, "to_dict") else str(e)
-                for e in raw_events
-            ]
+            events = [e.to_dict() if hasattr(e, "to_dict") else str(e) for e in raw_events]
         data = {
             "session_id": session.session_id,
             "saved_at": time.time(),
@@ -45,12 +42,17 @@ class SessionStore:
         results: list[dict[str, Any]] = []
         for p in sorted(self._dir.glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
             data = json.loads(p.read_text(encoding="utf-8"))
-            results.append({
-                "session_id": data.get("session_id", p.stem),
-                "saved_at": data.get("saved_at", 0),
-                "event_count": data.get("event_count", 0),
-            })
+            results.append(
+                {
+                    "session_id": data.get("session_id", p.stem),
+                    "saved_at": data.get("saved_at", 0),
+                    "event_count": data.get("event_count", 0),
+                }
+            )
         return results
+
+    def delete(self, session_id: str) -> bool:
+        return self.delete_session(session_id)
 
     def delete_session(self, session_id: str) -> bool:
         path = self._dir / f"{session_id}.json"

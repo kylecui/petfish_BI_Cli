@@ -48,11 +48,13 @@ class TestModelFactory:
             }
         )
         from petfish_bi_cli.config.model_factory import build_model
+
         model = build_model(settings)
         assert model is not None
 
     def test_build_from_settings_no_roles(self):
         settings = Settings(model=ModelConfig(provider="fake", name="fake"))
         from petfish_bi_cli.config.model_factory import build_model
+
         model = build_model(settings)
         assert model is not None

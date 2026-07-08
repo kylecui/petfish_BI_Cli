@@ -67,20 +67,26 @@ class LoadDataTool:
 
         if metric in ("comment_count", "评论数"):
             count = len(records)
-            claim = _make_claim(metric, float(count), "crocs_xiaohongshu",
-                                f"COUNT(评论内容 WHERE != '无') = {count}")
+            claim = _make_claim(
+                metric,
+                float(count),
+                "crocs_xiaohongshu",
+                f"COUNT(评论内容 WHERE != '无') = {count}",
+            )
         else:
-            claim = _make_claim(metric, float(len(records)), "crocs_xiaohongshu",
-                                f"COUNT = {len(records)}")
+            claim = _make_claim(
+                metric, float(len(records)), "crocs_xiaohongshu", f"COUNT = {len(records)}"
+            )
 
         self._registry.add(claim)
-        return ToolResult(value={
-            "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
-            "metadata": {"source": "crocs_xiaohongshu", "row_count": len(records)},
-        })
+        return ToolResult(
+            value={
+                "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
+                "metadata": {"source": "crocs_xiaohongshu", "row_count": len(records)},
+            }
+        )
 
-    def _load_products(self, source: str, metric: str, filters: dict | None,
-                       parser) -> ToolResult:
+    def _load_products(self, source: str, metric: str, filters: dict | None, parser) -> ToolResult:
         filename = _SOURCE_FILES.get(source)
         if not filename:
             return ToolResult(error=f"No file mapping for {source}")
@@ -116,10 +122,12 @@ class LoadDataTool:
         claim = _make_claim(metric, round(value, 2), source, comp)
         self._registry.add(claim)
 
-        return ToolResult(value={
-            "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
-            "metadata": {"source": source, "row_count": len(records)},
-        })
+        return ToolResult(
+            value={
+                "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
+                "metadata": {"source": source, "row_count": len(records)},
+            }
+        )
 
 
 def _make_claim(metric: str, value: float, source: str, computation: str) -> Claim:
@@ -134,6 +142,7 @@ def _make_claim(metric: str, value: float, source: str, computation: str) -> Cla
 
 def _parse_jd(path: Path) -> list[ProductRecord]:
     from petfish_bi_cli.ingestion.jd import parse_jd_json
+
     return parse_jd_json(path)
 
 

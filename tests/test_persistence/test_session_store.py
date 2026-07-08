@@ -48,6 +48,7 @@ class TestSessionStore:
         old_file = tmp_path / "old.json"
         old_file.write_text('{"session_id": "old", "saved_at": 0, "event_count": 0}')
         import os
+
         old_time = time.time() - 100 * 3600
         os.utime(old_file, (old_time, old_time))
 
@@ -61,5 +62,5 @@ class TestSessionStore:
 
     def test_save_creates_directory(self, tmp_path):
         new_dir = tmp_path / "nested" / "sessions"
-        store = SessionStore(base_dir=new_dir)
+        SessionStore(base_dir=new_dir)
         assert new_dir.exists()

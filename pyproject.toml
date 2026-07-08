@@ -47,6 +47,7 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
     "integration: requires real model API (skipped in CI without API key)",
+    "dotenv: test specifically exercises .env file loading",
 ]
 
 [tool.ruff]

@@ -108,7 +108,7 @@ def create_app():
     async def sla_status(
         x_api_key: str | None = Header(None, alias="X-API-Key"),
     ):
-        key = verify_api_key(x_api_key, sla_config)
+        verify_api_key(x_api_key, sla_config)
         return sla.snapshot()
 
     @app.get("/rate-limit")

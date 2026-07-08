@@ -12,12 +12,14 @@ class StructuredLogger:
     def info(self, msg: str, **kwargs):
         import json
         import time
+
         entry = {"ts": time.time(), "level": "info", "logger": self._name, "msg": msg, **kwargs}
         print(json.dumps(entry, ensure_ascii=False))
 
     def error(self, msg: str, **kwargs):
         import json
         import time
+
         entry = {"ts": time.time(), "level": "error", "logger": self._name, "msg": msg, **kwargs}
         print(json.dumps(entry, ensure_ascii=False))
 

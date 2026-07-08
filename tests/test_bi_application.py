@@ -59,9 +59,7 @@ class TestBIApplicationExecute:
         from petfishframework.core.types import ModelResponse
 
         model = FakeModel(
-            responses=(
-                ModelResponse(content="this is not valid JSON"),
-            ),
+            responses=(ModelResponse(content="this is not valid JSON"),),
         )
         app = BIApplication(data_root=DATA_ROOT, semantic_dir=SEMANTIC_DIR)
         report = app.execute(BIQuery(prompt="test"), model=model)

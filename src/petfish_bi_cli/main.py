@@ -17,12 +17,8 @@ def ask(
     data_source: list[str] = typer.Option(
         [], "--data-source", "-s", help="Filter to specific data sources"
     ),
-    output: Path | None = typer.Option(
-        None, "--output", "-o", help="Write JSON report to file"
-    ),
-    session_id: str | None = typer.Option(
-        None, "--session-id", help="Resume a previous session"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Write JSON report to file"),
+    session_id: str | None = typer.Option(None, "--session-id", help="Resume a previous session"),
 ):
     """Ask a BI question and get a JSON report."""
     bi_app = BIApplication()

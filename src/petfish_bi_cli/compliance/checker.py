@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -63,14 +64,12 @@ class ConfigLoader:
 
 
 _PII_PATTERNS = [
-    (r"\b1[3-9]\d{9}\b", "[手机号已脱敏]"),
-    (r"\b\d{15}(\d{2}[\dXx])?\b", "[身份证已脱敏]"),
-    (r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b", "[邮箱已脱敏]"),
-    (r"\b\d{16,19}\b", "[银行卡已脱敏]"),
-    (r"\b\d{3}-\d{8}\b", "[座机已脱敏]"),
+    (r"(?<!\d)1[3-9]\d{9}(?!\d)", "[手机号已脱敏]"),
+    (r"(?<!\d)\d{15}(?:\d{2}[\dXx])?(?!\d)", "[身份证已脱敏]"),
+    (r"[\w.+-]+@[\w-]+\.[\w.-]+", "[邮箱已脱敏]"),
+    (r"(?<!\d)\d{16,19}(?!\d)", "[银行卡已脱敏]"),
+    (r"(?<!\d)\d{3}-\d{8}(?!\d)", "[座机已脱敏]"),
 ]
-
-import re
 
 
 def redact_pii(text: str) -> str:
@@ -80,7 +79,7 @@ def redact_pii(text: str) -> str:
 
 
 def check_data_locality(data_path: Path, allowed_region: str = "CN") -> bool:
-    path_str = str(data_path.resolve())
+    str(data_path.resolve())
     if allowed_region == "CN":
         return True
     return True

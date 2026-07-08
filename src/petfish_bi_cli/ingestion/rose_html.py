@@ -20,7 +20,9 @@ class RoseHtmlProduct:
 
 def parse_rose_html(path: Path) -> list[RoseHtmlProduct]:
     html = Path(path).read_text(encoding="utf-8")
-    cards = re.findall(r'<div class="card">(.*?)</div>\s*</div>\s*</div>\s*</div>\s*</div>', html, re.DOTALL)
+    cards = re.findall(
+        r'<div class="card">(.*?)</div>\s*</div>\s*</div>\s*</div>\s*</div>', html, re.DOTALL
+    )
     if not cards:
         cards = re.split(r'<div class="card">', html)[1:]
 
@@ -38,10 +40,10 @@ def _parse_card(card: str) -> RoseHtmlProduct | None:
         return None
     title = title_m.group(1).strip()
 
-    item_id_m = re.search(r'商品ID</span>\s*<span[^>]*>([^<]+)', card)
+    item_id_m = re.search(r"商品ID</span>\s*<span[^>]*>([^<]+)", card)
     item_id = item_id_m.group(1).strip() if item_id_m else ""
 
-    shop_m = re.search(r'归属店铺</span>\s*.*?<span[^>]*>([^<]+)', card, re.DOTALL)
+    shop_m = re.search(r"归属店铺</span>\s*.*?<span[^>]*>([^<]+)", card, re.DOTALL)
     shop_name = shop_m.group(1).strip() if shop_m else ""
 
     platform_m = re.search(r'class="platform-tag"[^>]*>([^<]+)', card)
@@ -70,7 +72,7 @@ def _extract_price(card: str, price_class: str) -> float:
     m = re.search(pattern, card, re.DOTALL)
     if m:
         return float(m.group(1).replace(",", ""))
-    pattern2 = rf'{price_class}.*?￥([\d,.]+)'
+    pattern2 = rf"{price_class}.*?￥([\d,.]+)"
     m2 = re.search(pattern2, card, re.DOTALL)
     if m2:
         return float(m2.group(1).replace(",", ""))
@@ -78,13 +80,32 @@ def _extract_price(card: str, price_class: str) -> float:
 
 
 _BRAND_PATTERNS = [
-    "Hugo Boss", "HUGO BOSS", "BOSS",
-    "Adidas", "ADIDAS", "Nike", "NIKE",
-    "Anta", "安踏", "ANTA",
-    "UGG", "Puma", "PUMA", "New Balance",
-    "Skechers", "斯凯奇", "Crocs", "CROCS",
-    "Li Ning", "李宁", "特步", "XTEP",
-    "Converse", "Vans", "回力", "Warrior",
+    "Hugo Boss",
+    "HUGO BOSS",
+    "BOSS",
+    "Adidas",
+    "ADIDAS",
+    "Nike",
+    "NIKE",
+    "Anta",
+    "安踏",
+    "ANTA",
+    "UGG",
+    "Puma",
+    "PUMA",
+    "New Balance",
+    "Skechers",
+    "斯凯奇",
+    "Crocs",
+    "CROCS",
+    "Li Ning",
+    "李宁",
+    "特步",
+    "XTEP",
+    "Converse",
+    "Vans",
+    "回力",
+    "Warrior",
 ]
 
 

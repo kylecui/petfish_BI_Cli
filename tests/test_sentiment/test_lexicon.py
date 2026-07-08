@@ -37,9 +37,7 @@ class TestLexiconSentiment:
 
     def test_custom_lexicon(self, tmp_path):
         lexicon_file = tmp_path / "custom.txt"
-        lexicon_file.write_text(
-            "positive:\n  超值\n  买了\ndefault:\n", encoding="utf-8"
-        )
+        lexicon_file.write_text("positive:\n  超值\n  买了\ndefault:\n", encoding="utf-8")
         analyzer = LexiconSentimentAnalyzer(lexicon_path=lexicon_file)
         result = analyzer.analyze("超值买了")
         assert result.sentiment == "positive"

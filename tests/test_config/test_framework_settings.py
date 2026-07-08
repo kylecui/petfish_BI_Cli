@@ -17,6 +17,7 @@ class TestMakeBiAgentWithSettings:
 
     def test_explicit_model_overrides_settings(self):
         from petfishframework.models.fake import FakeModel
+
         settings = Settings(
             model=ModelConfig(provider="fake", name="fake"),
         )

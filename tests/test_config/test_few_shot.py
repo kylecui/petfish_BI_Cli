@@ -53,9 +53,7 @@ class TestFewShotSelector:
         pool = tmp_path / "pool"
         pool.mkdir()
         for i in range(5):
-            (pool / f"ex{i}.txt").write_text(
-                f"intent: lookup\nExample {i}", encoding="utf-8"
-            )
+            (pool / f"ex{i}.txt").write_text(f"intent: lookup\nExample {i}", encoding="utf-8")
         selector = FewShotSelector(pool_dir=pool)
         result = selector.select(query="query", intent="lookup", k=2)
         assert result.count("Example") <= 2
@@ -75,12 +73,14 @@ class TestPromptManagerEnhanced:
         prompt_file = tmp_path / "prompt.md"
         prompt_file.write_text("Version 2.0 BI prompt", encoding="utf-8")
 
-        mgr = PromptManager({
-            "system_prompt": {
-                "file": str(prompt_file),
-                "version": "2.0",
-            },
-        })
+        mgr = PromptManager(
+            {
+                "system_prompt": {
+                    "file": str(prompt_file),
+                    "version": "2.0",
+                },
+            }
+        )
         prompt = mgr.load_system_prompt()
         assert "Version 2.0" in prompt
 
@@ -94,15 +94,17 @@ class TestPromptManagerEnhanced:
             encoding="utf-8",
         )
 
-        mgr = PromptManager({
-            "system_prompt": {"file": str(prompt_file)},
-            "few_shot": {
-                "mode": "dynamic",
-                "pool_dir": str(pool),
-                "k": 1,
-                "selection": "intent-first",
-            },
-        })
+        mgr = PromptManager(
+            {
+                "system_prompt": {"file": str(prompt_file)},
+                "few_shot": {
+                    "mode": "dynamic",
+                    "pool_dir": str(pool),
+                    "k": 1,
+                    "selection": "intent-first",
+                },
+            }
+        )
         system = mgr.load_system_prompt()
         few_shot = mgr.select_few_shot("JD均价", intent="lookup")
         assert "BI" in system

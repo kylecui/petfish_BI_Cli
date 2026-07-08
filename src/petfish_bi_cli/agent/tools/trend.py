@@ -21,15 +21,17 @@ class TrendTool:
 
     name: str = "analyze_trend"
     description: str = "Analyze comment/price trends over time (daily/weekly/monthly buckets)"
-    input_schema: dict = field(default_factory=lambda: {
-        "type": "object",
-        "properties": {
-            "source": {"type": "string"},
-            "bucket": {"type": "string", "enum": ["day", "week", "month"], "default": "day"},
-            "metric": {"type": "string", "default": "comment_count"},
-        },
-        "required": ["source"],
-    })
+    input_schema: dict = field(
+        default_factory=lambda: {
+            "type": "object",
+            "properties": {
+                "source": {"type": "string"},
+                "bucket": {"type": "string", "enum": ["day", "week", "month"], "default": "day"},
+                "metric": {"type": "string", "default": "comment_count"},
+            },
+            "required": ["source"],
+        }
+    )
     risk_level: RiskLevel = RiskLevel.LOW
     capabilities: tuple[str, ...] = ("data:read",)
 
@@ -65,13 +67,16 @@ class TrendTool:
                 else 0.0
             )
 
-            trend_data.append({
-                "bucket": bucket_key,
-                "comment_count": count,
-                "positive_ratio": round(pos_ratio, 3),
-            })
+            trend_data.append(
+                {
+                    "bucket": bucket_key,
+                    "comment_count": count,
+                    "positive_ratio": round(pos_ratio, 3),
+                }
+            )
 
         import uuid
+
         claim = Claim(
             id=f"c{uuid.uuid4().hex[:6]}",
             metric="trend_peak_bucket",
@@ -80,12 +85,14 @@ class TrendTool:
         )
         self.registry.add(claim)
 
-        return ToolResult(value={
-            "trend": trend_data,
-            "bucket_type": bucket,
-            "total_buckets": len(trend_data),
-            "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
-        })
+        return ToolResult(
+            value={
+                "trend": trend_data,
+                "bucket_type": bucket,
+                "total_buckets": len(trend_data),
+                "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
+            }
+        )
 
     def _bucket_key(self, time_str: str, bucket: str) -> str | None:
         if not time_str:

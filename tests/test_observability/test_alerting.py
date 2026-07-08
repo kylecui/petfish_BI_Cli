@@ -12,33 +12,45 @@ from petfish_bi_cli.observability.metrics import MetricsCollector
 
 class TestAlertRule:
     def test_gt_evaluation(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="gt", severity="warning")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="gt", severity="warning"
+        )
         assert rule.evaluate(11) is True
         assert rule.evaluate(10) is False
         assert rule.evaluate(9) is False
 
     def test_lt_evaluation(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="lt", severity="warning")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="lt", severity="warning"
+        )
         assert rule.evaluate(9) is True
         assert rule.evaluate(10) is False
 
     def test_gte_evaluation(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="gte", severity="warning")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="gte", severity="warning"
+        )
         assert rule.evaluate(10) is True
         assert rule.evaluate(9) is False
 
     def test_lte_evaluation(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="lte", severity="warning")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="lte", severity="warning"
+        )
         assert rule.evaluate(10) is True
         assert rule.evaluate(11) is False
 
     def test_eq_evaluation(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="eq", severity="info")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="eq", severity="info"
+        )
         assert rule.evaluate(10) is True
         assert rule.evaluate(10.01) is False
 
     def test_unknown_comparison_returns_false(self):
-        rule = AlertRule(name="test", metric_name="x", threshold=10, comparison="weird", severity="info")
+        rule = AlertRule(
+            name="test", metric_name="x", threshold=10, comparison="weird", severity="info"
+        )
         assert rule.evaluate(100) is False
 
 
@@ -51,17 +63,35 @@ class TestAlertEngine:
     def test_metric_below_threshold_no_alert(self):
         metrics = MetricsCollector()
         metrics.record("errors_total", 5)
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="high_err", metric_name="errors_total", threshold=10, comparison="gt", severity="critical"),
-        ])
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="high_err",
+                    metric_name="errors_total",
+                    threshold=10,
+                    comparison="gt",
+                    severity="critical",
+                ),
+            ],
+        )
         assert engine.check() == []
 
     def test_metric_above_threshold_fires_alert(self):
         metrics = MetricsCollector()
         metrics.record("errors_total", 15)
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="high_err", metric_name="errors_total", threshold=10, comparison="gt", severity="critical"),
-        ])
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="high_err",
+                    metric_name="errors_total",
+                    threshold=10,
+                    comparison="gt",
+                    severity="critical",
+                ),
+            ],
+        )
         alerts = engine.check()
         assert len(alerts) == 1
         assert alerts[0].rule_name == "high_err"
@@ -72,8 +102,11 @@ class TestAlertEngine:
         metrics = MetricsCollector()
         metrics.record("errors_total", 15)
         rule = AlertRule(
-            name="high_err", metric_name="errors_total",
-            threshold=10, comparison="gt", severity="critical",
+            name="high_err",
+            metric_name="errors_total",
+            threshold=10,
+            comparison="gt",
+            severity="critical",
             cooldown_seconds=3600,
         )
         engine = AlertEngine(metrics=metrics, rules=[rule])
@@ -84,18 +117,37 @@ class TestAlertEngine:
 
     def test_missing_metric_skips_rule(self):
         metrics = MetricsCollector()
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="x", metric_name="nonexistent", threshold=1, comparison="gt", severity="info"),
-        ])
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="x",
+                    metric_name="nonexistent",
+                    threshold=1,
+                    comparison="gt",
+                    severity="info",
+                ),
+            ],
+        )
         assert engine.check() == []
 
     def test_custom_handler_called(self):
         metrics = MetricsCollector()
         metrics.record("errors_total", 20)
         handler = MagicMock()
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="err", metric_name="errors_total", threshold=10, comparison="gt", severity="critical"),
-        ], on_alert=handler)
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="err",
+                    metric_name="errors_total",
+                    threshold=10,
+                    comparison="gt",
+                    severity="critical",
+                ),
+            ],
+            on_alert=handler,
+        )
         engine.check()
         handler.assert_called_once()
         event = handler.call_args.args[0]
@@ -105,17 +157,34 @@ class TestAlertEngine:
     def test_add_rule(self):
         metrics = MetricsCollector()
         engine = AlertEngine(metrics=metrics, rules=[])
-        engine.add_rule(AlertRule(name="new", metric_name="x", threshold=1, comparison="gt", severity="info"))
+        engine.add_rule(
+            AlertRule(name="new", metric_name="x", threshold=1, comparison="gt", severity="info")
+        )
         assert len(engine._rules) == 1
 
     def test_multiple_rules_fire_independently(self):
         metrics = MetricsCollector()
         metrics.record("errors_total", 20)
         metrics.record("avg_response_time", 45.0)
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="err", metric_name="errors_total", threshold=10, comparison="gt", severity="critical"),
-            AlertRule(name="latency", metric_name="avg_response_time", threshold=30, comparison="gt", severity="warning"),
-        ])
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="err",
+                    metric_name="errors_total",
+                    threshold=10,
+                    comparison="gt",
+                    severity="critical",
+                ),
+                AlertRule(
+                    name="latency",
+                    metric_name="avg_response_time",
+                    threshold=30,
+                    comparison="gt",
+                    severity="warning",
+                ),
+            ],
+        )
         alerts = engine.check()
         assert len(alerts) == 2
         names = {a.rule_name for a in alerts}
@@ -129,8 +198,17 @@ class TestAlertEngine:
     def test_alert_event_has_timestamp(self):
         metrics = MetricsCollector()
         metrics.record("errors_total", 15)
-        engine = AlertEngine(metrics=metrics, rules=[
-            AlertRule(name="err", metric_name="errors_total", threshold=10, comparison="gt", severity="critical"),
-        ])
+        engine = AlertEngine(
+            metrics=metrics,
+            rules=[
+                AlertRule(
+                    name="err",
+                    metric_name="errors_total",
+                    threshold=10,
+                    comparison="gt",
+                    severity="critical",
+                ),
+            ],
+        )
         alerts = engine.check()
         assert alerts[0].timestamp > 0

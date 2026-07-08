@@ -12,10 +12,12 @@ class TestCrossSourceComparison:
     def test_jd_vs_tmall_avg_price(self):
         reg = ClaimsRegistry()
         tool = CrossSourceComparisonTool(data_root=DATA_ROOT, registry=reg)
-        result = tool.execute({
-            "sources": ["jd_products", "tmall_products"],
-            "metric": "avg_price",
-        })
+        result = tool.execute(
+            {
+                "sources": ["jd_products", "tmall_products"],
+                "metric": "avg_price",
+            }
+        )
         assert result.error is None
         assert "jd_products" in result.value["comparison"]
         assert "tmall_products" in result.value["comparison"]

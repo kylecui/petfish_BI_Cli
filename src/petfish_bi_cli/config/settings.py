@@ -112,6 +112,7 @@ def _load_dotenv() -> None:
 def _do_load_dotenv(path: Path) -> None:
     try:
         from dotenv import load_dotenv
+
         load_dotenv(path, override=False)
     except ImportError:
         pass
@@ -120,6 +121,8 @@ def _do_load_dotenv(path: Path) -> None:
 def _deep_merge(base: dict, override: dict) -> dict:
     result = dict(base)
     for k, v in override.items():
+        if v is None:
+            continue
         if k in result and isinstance(result[k], dict) and isinstance(v, dict):
             result[k] = _deep_merge(result[k], v)
         else:
@@ -139,6 +142,8 @@ _ENV_MAP = {
 _STANDARD_ENV_KEYS = {
     "OPENAI_API_KEY": ("model", "api_key"),
     "ANTHROPIC_API_KEY": ("model", "api_key"),
+    "OPENAI_BASE_URL": ("model", "base_url"),
+    "ANTHROPIC_BASE_URL": ("model", "base_url"),
 }
 
 
@@ -146,7 +151,7 @@ def _apply_standard_env(raw: dict) -> dict:
     result = _deep_merge({}, raw)
     for env_key, path in _STANDARD_ENV_KEYS.items():
         val = os.environ.get(env_key)
-        if val is None:
+        if not val:
             continue
         _set_nested(result, path, val)
     return result
@@ -156,7 +161,7 @@ def _apply_env_overrides(raw: dict) -> dict:
     result = _deep_merge({}, raw)
     for env_key, path in _ENV_MAP.items():
         val = os.environ.get(env_key)
-        if val is None:
+        if not val:
             continue
         if path[-1] == "temperature":
             val = float(val)

@@ -13,9 +13,11 @@ class ModelFactory:
         provider = cfg.provider.lower()
         if provider == "fake":
             from petfishframework.models.fake import FakeModel
+
             return FakeModel()
         if provider == "openai":
             from petfishframework.models.openai import OpenAIModel
+
             return OpenAIModel(
                 model=cfg.name,
                 api_key=cfg.api_key,
@@ -23,6 +25,7 @@ class ModelFactory:
             )
         if provider == "anthropic":
             from petfishframework.models.anthropic import AnthropicModel
+
             return AnthropicModel(
                 model=cfg.name,
                 api_key=cfg.api_key,

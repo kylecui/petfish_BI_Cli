@@ -7,9 +7,20 @@ from typing import Any
 from petfish_bi_cli.grounding.claims import ClaimsLedger
 
 _CN_NUM_MAP = {
-    "零": 0, "一": 1, "二": 2, "三": 3, "四": 4,
-    "五": 5, "六": 6, "七": 7, "八": 8, "九": 9,
-    "十": 10, "百": 100, "千": 1000, "万": 10000,
+    "零": 0,
+    "一": 1,
+    "二": 2,
+    "三": 3,
+    "四": 4,
+    "五": 5,
+    "六": 6,
+    "七": 7,
+    "八": 8,
+    "九": 9,
+    "十": 10,
+    "百": 100,
+    "千": 1000,
+    "万": 10000,
     "两": 2,
 }
 
@@ -93,7 +104,9 @@ def validate_report_enhanced(
 ) -> EnhancedValidationResult:
     claim_values: dict[str, float] = {}
     for claim in claims.claims:
-        claim_values[claim.id] = float(claim.value) if isinstance(claim.value, (int, float)) else 0.0
+        claim_values[claim.id] = (
+            float(claim.value) if isinstance(claim.value, (int, float)) else 0.0
+        )
 
     all_claim_nums = set(claim_values.values())
     answer_numbers = extract_numbers(report_answer)
@@ -158,7 +171,9 @@ def validate_report_enhanced(
                     ratio = _levenshtein_ratio(quote, claim_text)
                     best_ratio = max(best_ratio, ratio)
                 if best_ratio < fuzzy_threshold:
-                    warnings.append(f"Supporting quote fuzzy match below threshold: {best_ratio:.2f}")
+                    warnings.append(
+                        f"Supporting quote fuzzy match below threshold: {best_ratio:.2f}"
+                    )
 
     valid = len(errors) == 0
     return EnhancedValidationResult(

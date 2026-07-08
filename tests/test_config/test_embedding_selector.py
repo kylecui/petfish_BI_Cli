@@ -22,7 +22,9 @@ class TestEmbeddingSelector:
     def test_ranks_by_similarity(self):
         sel = EmbeddingSelector()
         sel.add(FewShotExample(input="天气不错", output="irrelevant", intent=""))
-        sel.add(FewShotExample(input="CROCS京东天猫价格对比", output="compare", intent="comparison"))
+        sel.add(
+            FewShotExample(input="CROCS京东天猫价格对比", output="compare", intent="comparison")
+        )
         sel.add(FewShotExample(input="CROCS均价", output="lookup", intent="lookup"))
         results = sel.select("CROCS价格对比", k=2)
         assert len(results) >= 1

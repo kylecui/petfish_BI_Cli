@@ -43,6 +43,7 @@ def with_retry(
                             delay,
                         )
                         import time
+
                         time.sleep(delay)
                         delay *= backoff
                     else:
@@ -60,7 +61,9 @@ def with_retry(
     return decorator
 
 
-def safe_execute(func: Callable[..., T], *args: Any, default: T | None = None, **kwargs: Any) -> T | None:
+def safe_execute(
+    func: Callable[..., T], *args: Any, default: T | None = None, **kwargs: Any
+) -> T | None:
     """Execute function, return default on error instead of raising."""
     try:
         return func(*args, **kwargs)

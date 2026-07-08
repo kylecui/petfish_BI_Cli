@@ -14,6 +14,7 @@ class ConfigurableBIAgentStrategy(BIAgentStrategy):
 
     def _system_prompt(self, tools: list) -> str:
         from petfishframework.reasoning.react import ReAct
+
         base = ReAct._system_prompt(self, tools)
         bi_prompt = self._pm.load_system_prompt()
         few_shot = self._pm.select_few_shot(self._query, self._intent)

@@ -41,7 +41,7 @@ class TestMCPLoader:
     def test_auto_load_false_returns_empty(self, tmp_path):
         config_file = tmp_path / "mcp.yml"
         config_file.write_text(
-            'auto_load: false\nservers:\n  fs:\n    command: npx\n    args: []\n',
+            "auto_load: false\nservers:\n  fs:\n    command: npx\n    args: []\n",
             encoding="utf-8",
         )
         loader = MCPLoader(config_path=str(config_file))

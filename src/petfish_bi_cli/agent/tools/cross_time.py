@@ -23,7 +23,9 @@ class CrossTimeTool(Tool):
         self._claim_counter = 0
 
     name = "cross_time_compare"
-    description = "Compare prices across different crawl timepoints. Use for trend-over-time analysis."
+    description = (
+        "Compare prices across different crawl timepoints. Use for trend-over-time analysis."
+    )
     input_schema = {
         "type": "object",
         "properties": {
@@ -61,13 +63,15 @@ class CrossTimeTool(Tool):
                 source=source,
                 computation=f"avg of {snap.count} items at {snap.timestamp}",
             )
-            comparisons.append({
-                "timestamp": snap.timestamp,
-                "item_count": snap.count,
-                "avg_price": snap.avg_price,
-                "price_range": list(snap.price_range),
-                "claim_id": claim.id,
-            })
+            comparisons.append(
+                {
+                    "timestamp": snap.timestamp,
+                    "item_count": snap.count,
+                    "avg_price": snap.avg_price,
+                    "price_range": list(snap.price_range),
+                    "claim_id": claim.id,
+                }
+            )
 
         diff = round(last.avg_price - first.avg_price, 2)
         pct = (
@@ -96,7 +100,11 @@ class CrossTimeTool(Tool):
                     "claim_id": diff_claim.id,
                 },
                 "claims": [
-                    {"id": c["claim_id"], "metric": c["metric"] if "metric" in c else "", "value": c["avg_price"]}
+                    {
+                        "id": c["claim_id"],
+                        "metric": c["metric"] if "metric" in c else "",
+                        "value": c["avg_price"],
+                    }
                     for c in comparisons
                 ],
             }

@@ -41,7 +41,7 @@ class TestWithRetry:
 
         try:
             func()
-            assert False, "should have raised"
+            raise AssertionError("should have raised")
         except ValueError:
             pass
         assert call_count == 3
@@ -57,7 +57,7 @@ class TestWithRetry:
 
         try:
             func()
-            assert False, "should have raised"
+            raise AssertionError("should have raised")
         except ValueError:
             pass
         assert call_count == 1
@@ -78,8 +78,10 @@ class TestWithRetry:
             delays.append(seconds)
 
         import time
+
         time.sleep = mock_sleep
         try:
+
             @with_retry(max_attempts=3, delay_seconds=1.0, backoff=2.0)
             def func():
                 raise ValueError("always fail")
