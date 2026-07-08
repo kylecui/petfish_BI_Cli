@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 
+from petfishframework.core.structured import StructuredResult, parse_structured
 from petfishframework.core.types import Budget, BudgetExceeded, Task
 
 from petfish_bi_cli.domain import BIQuery, BIReport
 from petfish_bi_cli.framework import make_bi_agent
 from petfish_bi_cli.grounding.claims import ClaimsRegistry
 from petfish_bi_cli.grounding.validator import validate_report
+from petfish_bi_cli.observability.siem import PIIRedactingSink, make_siem_sink
 
 
 @dataclass
@@ -42,10 +44,14 @@ class BIApplication:
             registry=registry,
         )
 
-        task = Task(prompt=query.prompt, metadata=dict(query.metadata))
+        field_names = [f.name for f in fields(BIReport)]
+        augmented_prompt = (
+            f"{query.prompt}\n\nReturn your answer as JSON with these fields: {field_names}"
+        )
+        task = Task(prompt=augmented_prompt, metadata=dict(query.metadata))
 
         try:
-            result = agent.run_structured(task, BIReport)
+            result = self._run_with_siem(agent, task, budget)
         except BudgetExceeded as exc:
             return BIReport(
                 answer=f"Budget exceeded: {exc}",
@@ -91,6 +97,29 @@ class BIApplication:
         )
 
         return report
+
+    @staticmethod
+    def _run_with_siem(agent, task: Task, budget: Budget | None) -> StructuredResult:
+        """Create a Session, wire SIEMSink, run, and parse structured output."""
+        session = agent.session(task, budget=budget)
+        siem = make_siem_sink()
+        session.events.subscribe(PIIRedactingSink(siem))
+        run_result = session.run()
+        try:
+            parsed = parse_structured(run_result.answer, BIReport)
+            return StructuredResult(
+                answer=run_result.answer,
+                data=parsed,
+                parse_error=None,
+                session_id=run_result.session_id,
+            )
+        except ValueError as exc:
+            return StructuredResult(
+                answer=run_result.answer,
+                data=None,
+                parse_error=str(exc),
+                session_id=run_result.session_id,
+            )
 
     def get_session(self, session_id: str) -> _SessionRecord | None:
         return self._sessions.get(session_id)
