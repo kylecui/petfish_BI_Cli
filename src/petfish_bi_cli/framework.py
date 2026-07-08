@@ -41,7 +41,10 @@ def make_bi_agent(
     )
 
     all_tools = ToolFactory.build_all(
-        sources=sources, registry=registry, data_root=data_root,
+        sources=sources,
+        registry=registry,
+        data_root=data_root,
+        scripts=ToolFactory.parse_scripts_config(settings.raw),
     ) + tools
 
     policy = _load_policy()

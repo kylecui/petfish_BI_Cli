@@ -1,0 +1,65 @@
+model:
+  provider: fake
+  name: fake
+  temperature: 0.0
+  max_tokens: 4096
+
+  # Real model usage (uncomment and configure):
+  # provider: openai
+  # name: gpt-4o
+  # api_key: null        # null = read OPENAI_API_KEY env var
+  # base_url: null       # null = read OPENAI_BASE_URL env var
+  # temperature: 0.0
+  # max_tokens: 4096
+
+budget:
+  max_tokens_per_session: 100000
+  max_cost_usd: 0.50
+  max_steps: 25
+
+data:
+  root: references
+  semantic_dir: references/semantic
+
+# Data sources — declare your CSV/JSON data files here.
+# When omitted, the system falls back to references/semantic/*.yml metadata.
+# sources:
+#   my_data:
+#     type: json
+#     path: my_data.json
+#     description: "My custom data source"
+#     metrics:
+#       - name: avg_value
+#         column: price
+#         aggregation: avg
+#         unit: CNY
+
+# BI Scripts — wrap customer scripts as Agent-callable tools.
+# scripts:
+#   sales_report:
+#     command: "python scripts/sales_report.py"
+#     description: "Generate sales report"
+#     input_schema:
+#       type: object
+#       properties:
+#         start_date: { type: string }
+#         end_date: { type: string }
+#       required: [start_date, end_date]
+#     output_format: json
+#     timeout_s: 30
+#     risk_level: medium
+#     capabilities: ["data:read"]
+
+# Output templates — customize JSON/Markdown/HTML rendering.
+# templates:
+#   default:
+#     json: templates/report.json.j2
+#     markdown: templates/report.md.j2
+#     html: templates/report.html.j2
+
+# HashiCorp Vault integration (requires: pip install petfish-bi-cli[vault])
+# vault:
+#   enabled: true
+#   url: https://vault.example.com
+#   token: null
+#   api_key_path: secret/data/bi-cli/openai-key
