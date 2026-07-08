@@ -38,6 +38,7 @@ def validate_report(
     claim_map = claims.by_id()
     claim_value_strs = [str(c.value) for c in claims.claims]
     claim_metrics = {c.metric: c for c in claims.claims}
+    grounded_nums = claims.all_grounded_numbers()
 
     findings = report_data.get("findings", [])
     if isinstance(findings, list):
@@ -71,7 +72,15 @@ def validate_report(
 
     numbers = re.findall(r"\d+\.?\d*", report_answer)
     for num in numbers:
-        if not any(num in cv for cv in claim_value_strs):
+        try:
+            num_float = float(num)
+            in_grounded = any(
+                abs(num_float - g) < 0.01 for g in grounded_nums
+            )
+        except ValueError:
+            in_grounded = False
+        in_claims = any(num in cv for cv in claim_value_strs)
+        if not in_grounded and not in_claims:
             if len(num) > 1 or num not in ("0", "1"):
                 if not _is_unit_context(report_answer, num):
                     errors.append(f"Number '{num}' in answer not found in any claim")

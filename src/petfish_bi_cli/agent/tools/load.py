@@ -99,6 +99,7 @@ class LoadDataTool:
             )
 
         self._registry.add(claim)
+        self._registry.add_allowed_number(float(len(records)))
         return ToolResult(
             value={
                 "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
@@ -141,7 +142,8 @@ class LoadDataTool:
 
         claim = _make_claim(metric, round(value, 2), source, comp)
         self._registry.add(claim)
-
+        self._registry.add_allowed_number(float(len(records)))
+        self._registry.add_allowed_number(float(len(prices)))
         return ToolResult(
             value={
                 "claims": [{"id": claim.id, "metric": claim.metric, "value": claim.value}],
