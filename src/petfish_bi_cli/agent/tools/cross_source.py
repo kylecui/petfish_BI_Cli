@@ -37,6 +37,11 @@ class CrossSourceComparisonTool:
     input_schema: dict[str, Any] = field(default_factory=lambda: _CROSS_SOURCE_SCHEMA)
     risk_level: RiskLevel = RiskLevel.LOW
     capabilities: tuple[str, ...] = ("data:read",)
+    side_effect: bool = False
+    idempotent: bool = True
+    external_egress: bool = False
+    requires_credentials: bool = False
+    credential_name: str | None = None
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         sources = args.get("sources", ["jd_products", "tmall_products"])
@@ -59,6 +64,16 @@ class CrossSourceComparisonTool:
                 stats[source] = {"count": 0.0, "avg": 0.0, "min": 0.0, "max": 0.0, "range": 0.0}
 
         claims_out: list[dict] = []
+        for source in sources:
+            if stats[source]["avg"] > 0:
+                claim = self._make_claim(
+                    metric=f"avg_price_{source}",
+                    value=stats[source]["avg"],
+                    source=source,
+                    computation=f"AVG(price) over {int(stats[source]['count'])} items",
+                )
+                claims_out.append({"id": claim.id, "metric": claim.metric, "value": claim.value})
+
         if len(sources) >= 2 and all(stats[s]["avg"] > 0 for s in sources[:2]):
             s1, s2 = sources[0], sources[1]
             diff = round(stats[s1]["avg"] - stats[s2]["avg"], 2)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from petfishframework.core.contracts import Tool, ToolResult
+from petfishframework.core.contracts import RiskLevel, Tool, ToolResult
 
 from petfish_bi_cli.grounding.claims import Claim, ClaimsRegistry
 from petfish_bi_cli.ingestion.timepoint import (
@@ -33,8 +33,13 @@ class CrossTimeTool(Tool):
             "metric": {"type": "string", "description": "avg_price (default)"},
         },
     }
-    risk_level = "low"
-    capabilities = frozenset({"fs:read"})
+    risk_level = RiskLevel.LOW
+    capabilities = ("data:read",)
+    side_effect = False
+    idempotent = True
+    external_egress = False
+    requires_credentials = False
+    credential_name: str | None = None
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         source = args.get("source", "tmall_products")

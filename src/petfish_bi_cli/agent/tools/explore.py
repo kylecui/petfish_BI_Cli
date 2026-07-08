@@ -27,7 +27,12 @@ class ExploreDataSourcesTool:
         },
     }
     risk_level = RiskLevel.LOW
-    capabilities = ("fs:read",)
+    capabilities = ("data:read",)
+    side_effect = False
+    idempotent = True
+    external_egress = False
+    requires_credentials = False
+    credential_name: str | None = None
 
     def __init__(self, semantic_dir: Path):
         self._semantic_dir = semantic_dir

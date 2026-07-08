@@ -64,4 +64,4 @@ class TestLoadDataTool:
     def test_tool_protocol_attributes(self):
         tool = LoadDataTool(data_root=DATA_ROOT, registry=ClaimsRegistry())
         assert tool.name == "load_data"
-        assert "fs:read" in tool.capabilities
+        assert "data:read" in tool.capabilities

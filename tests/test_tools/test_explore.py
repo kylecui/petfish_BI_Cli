@@ -36,4 +36,4 @@ class TestExploreDataSourcesTool:
         assert tool.description
         assert tool.input_schema
         assert tool.risk_level is not None
-        assert "fs:read" in tool.capabilities
+        assert "data:read" in tool.capabilities

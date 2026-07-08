@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from petfishframework import Agent
+from petfishframework import Agent, YamlPolicy
+from petfishframework.permissions.model import DefaultAllowPolicy, PermissionPolicy
 
 from petfish_bi_cli.agent.strategy import BIAgentStrategy
 from petfish_bi_cli.agent.tools.cross_source import CrossSourceComparisonTool
@@ -14,6 +15,8 @@ from petfish_bi_cli.agent.tools.trend import TrendTool
 from petfish_bi_cli.config.model_factory import build_model
 from petfish_bi_cli.config.settings import Settings, load_settings
 from petfish_bi_cli.grounding.claims import ClaimsRegistry
+
+_POLICY_PATH = Path("configs/policy.yml")
 
 
 def make_bi_agent(
@@ -49,8 +52,21 @@ def make_bi_agent(
     all_tools = (
         explore, load, sentiment, trend, cross_source, cross_time,
     ) + tools
+
+    policy = _load_policy()
+    if isinstance(policy, YamlPolicy):
+        policy.register_tools(all_tools)
+
     return Agent(
         model=model,
         reasoning=BIAgentStrategy(),
         tools=all_tools,
+        permission_policy=policy,
     )
+
+
+def _load_policy() -> PermissionPolicy:
+    """Load YamlPolicy from configs/policy.yml; fall back to DefaultAllowPolicy."""
+    if _POLICY_PATH.exists():
+        return YamlPolicy.from_file(str(_POLICY_PATH))
+    return DefaultAllowPolicy()

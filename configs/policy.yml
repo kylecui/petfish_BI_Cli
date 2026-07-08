@@ -2,12 +2,6 @@ version: "1.0"
 name: "bi-cli-default"
 
 rules:
-  - name: "allow-read-tools"
-    priority: 100
-    when:
-      tool.capabilities_contains: "data:read"
-    effect: ALLOW
-
   - name: "deny-write-tools"
     priority: 200
     when:
@@ -21,6 +15,21 @@ rules:
       tool.external_egress: true
     effect: DENY
     reason: "BI agent cannot make external network calls"
+
+  - name: "redact-audit-filters"
+    priority: 150
+    when:
+      tool.capabilities_contains: "data:read"
+    effect: ALLOW
+    reason: "Allow data reads; redact user-provided filters from audit log"
+    event_mask_fields:
+      - args.filters
+
+  - name: "allow-read-tools"
+    priority: 100
+    when:
+      tool.capabilities_contains: "data:read"
+    effect: ALLOW
 
   - name: "default-allow"
     priority: 0

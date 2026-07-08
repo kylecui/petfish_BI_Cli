@@ -47,6 +47,11 @@ class SentimentAnalysisTool:
     )
     risk_level: RiskLevel = RiskLevel.LOW
     capabilities: tuple[str, ...] = ("data:read",)
+    side_effect: bool = False
+    idempotent: bool = True
+    external_egress: bool = False
+    requires_credentials: bool = False
+    credential_name: str | None = None
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         source = args.get("source", "crocs_xiaohongshu")

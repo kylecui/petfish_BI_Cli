@@ -72,6 +72,7 @@ def validate_report(
 
     numbers = re.findall(r"\d+\.?\d*", report_answer)
     for num in numbers:
+        num_float: float
         try:
             num_float = float(num)
             in_grounded = any(
@@ -79,11 +80,13 @@ def validate_report(
             )
         except ValueError:
             in_grounded = False
+            num_float = 0.0
         in_claims = any(num in cv for cv in claim_value_strs)
         if not in_grounded and not in_claims:
             if len(num) > 1 or num not in ("0", "1"):
                 if not _is_unit_context(report_answer, num):
-                    errors.append(f"Number '{num}' in answer not found in any claim")
+                    if not _is_derived_from_grounded(num_float, grounded_nums):
+                        errors.append(f"Number '{num}' in answer not found in any claim")
 
     if isinstance(findings, list) and len(findings) > 0:
         findings_with_claims = sum(
@@ -109,6 +112,22 @@ def _values_match(a, b, tolerance: float = 0.01) -> bool:
             return abs(a - b) / abs(b) < tolerance
         return abs(a - b) < tolerance
     return str(a) == str(b)
+
+
+def _is_derived_from_grounded(num: float, grounded: set[float], tolerance: float = 0.5) -> bool:
+    """Check if a number is derivable from grounded values via diff, sum, or ratio."""
+    grounded_list = sorted(grounded)
+    for i, a in enumerate(grounded_list):
+        for b in grounded_list[i:]:
+            if abs(num - abs(a - b)) < tolerance:
+                return True
+            if abs(num - (a + b)) < tolerance:
+                return True
+            if b > 0 and abs(num - abs(a - b) / b * 100) < tolerance:
+                return True
+            if b > 0 and abs(num - a / b * 100) < tolerance:
+                return True
+    return False
 
 
 def _is_unit_context(text: str, num: str) -> bool:

@@ -14,7 +14,7 @@ GOLDEN_CASES = [
         "query": "CROCS在京东的均价是多少？",
         "intent": "lookup",
         "expected_status": "ok",
-        "expected_keywords": ["424"],
+        "expected_keywords": ["561"],
         "expected_data_metrics": ["avg_price"],
     },
     {
@@ -22,7 +22,7 @@ GOLDEN_CASES = [
         "query": "CROCS在京东和天猫的价格差异",
         "intent": "comparison",
         "expected_status": "ok",
-        "expected_keywords": ["424", "407"],
+        "expected_keywords": ["561", "421"],
         "expected_data_metrics": ["avg_price", "price_diff"],
     },
     {

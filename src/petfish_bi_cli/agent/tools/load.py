@@ -49,7 +49,12 @@ class LoadDataTool:
         "required": ["source"],
     }
     risk_level = RiskLevel.LOW
-    capabilities = ("fs:read",)
+    capabilities = ("data:read",)
+    side_effect = False
+    idempotent = True
+    external_egress = False
+    requires_credentials = False
+    credential_name: str | None = None
 
     def __init__(self, data_root: Path, registry: ClaimsRegistry):
         self._data_root = data_root
