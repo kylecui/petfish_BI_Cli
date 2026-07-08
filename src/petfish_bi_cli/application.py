@@ -100,10 +100,14 @@ class BIApplication:
 
     @staticmethod
     def _run_with_siem(agent, task: Task, budget: Budget | None) -> StructuredResult:
-        """Create a Session, wire SIEMSink, run, and parse structured output."""
+        """Create a Session, wire audit sinks, run, and parse structured output."""
         session = agent.session(task, budget=budget)
+
         siem = make_siem_sink()
         session.events.subscribe(PIIRedactingSink(siem))
+
+        _try_subscribe_otel(session.events)
+
         run_result = session.run()
         try:
             parsed = parse_structured(run_result.answer, BIReport)
@@ -123,3 +127,13 @@ class BIApplication:
 
     def get_session(self, session_id: str) -> _SessionRecord | None:
         return self._sessions.get(session_id)
+
+
+def _try_subscribe_otel(events) -> None:
+    """Subscribe OTelSink if opentelemetry is available; degrade to no-op."""
+    try:
+        from petfishframework.observability import OTelSink
+
+        events.subscribe(OTelSink())
+    except Exception:
+        pass

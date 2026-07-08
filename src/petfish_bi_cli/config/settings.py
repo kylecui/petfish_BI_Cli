@@ -32,11 +32,20 @@ class DataConfig:
 
 
 @dataclass(frozen=True)
+class VaultConfig:
+    enabled: bool = False
+    url: str = ""
+    token: str | None = None
+    api_key_path: str | None = None
+
+
+@dataclass(frozen=True)
 class Settings:
     model: ModelConfig = field(default_factory=ModelConfig)
     roles: dict[str, ModelConfig] = field(default_factory=dict)
     budget: BudgetConfig = field(default_factory=BudgetConfig)
     data: DataConfig = field(default_factory=DataConfig)
+    vault: VaultConfig = field(default_factory=VaultConfig)
     raw: dict[str, Any] = field(default_factory=dict, repr=False)
 
     @property
@@ -211,10 +220,19 @@ def _build_settings(raw: dict) -> Settings:
         semantic_dir=data_raw.get("semantic_dir", "references/semantic"),
     )
 
+    vault_raw = raw.get("vault", {})
+    vault = VaultConfig(
+        enabled=vault_raw.get("enabled", False),
+        url=vault_raw.get("url", ""),
+        token=vault_raw.get("token"),
+        api_key_path=vault_raw.get("api_key_path"),
+    )
+
     return Settings(
         model=model,
         roles=roles,
         budget=budget,
         data=data,
+        vault=vault,
         raw=raw,
     )

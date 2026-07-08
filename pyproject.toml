@@ -19,6 +19,8 @@ dependencies = [
 openai = ["petfishframework[openai]>=0.4.1"]
 anthropic = ["petfishframework[anthropic]>=0.4.1"]
 mcp = ["petfishframework[mcp]>=0.4.1"]
+otel = ["opentelemetry-api>=1.20", "opentelemetry-sdk>=1.20"]
+vault = ["hvac>=1.0"]
 data = ["pandas>=2.0"]
 sentiment = ["snownlp>=0.12"]
 web = [

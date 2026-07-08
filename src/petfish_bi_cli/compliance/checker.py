@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -73,9 +72,9 @@ _PII_PATTERNS = [
 
 
 def redact_pii(text: str) -> str:
-    for pattern, replacement in _PII_PATTERNS:
-        text = re.sub(pattern, replacement, text)
-    return text
+    from petfish_bi_cli.compliance.pii import redact_pii as _redact
+
+    return _redact(text)
 
 
 def check_data_locality(data_path: Path, allowed_region: str = "CN") -> bool:

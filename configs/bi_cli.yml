@@ -33,3 +33,10 @@ budget:
 data:
   root: references
   semantic_dir: references/semantic
+
+# HashiCorp Vault integration (requires: pip install petfish-bi-cli[vault])
+# vault:
+#   enabled: true
+#   url: https://vault.example.com
+#   token: null                    # null = read VAULT_TOKEN env var
+#   api_key_path: secret/data/bi-cli/openai-key

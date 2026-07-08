@@ -5,11 +5,9 @@ from typing import Any, Callable
 
 from petfishframework.observability.siem_sink import DEFAULT_REDACT_KEYS, SIEMSink
 
-from petfish_bi_cli.compliance.checker import redact_pii
+from petfish_bi_cli.compliance.pii import PII_TEXT_FIELDS, PIIRedactor
 
 DEFAULT_SIEM_OUTPUT = Path("outputs/audit/siem.jsonl")
-
-_PII_TEXT_FIELDS = frozenset({"task", "query", "answer", "prompt", "reason"})
 
 
 def make_siem_sink(
@@ -30,26 +28,18 @@ class PIIRedactingSink:
     def __init__(
         self,
         downstream: Callable[[Any], None],
-        text_fields: frozenset[str] = _PII_TEXT_FIELDS,
+        text_fields: frozenset[str] = PII_TEXT_FIELDS,
+        redactor: PIIRedactor | None = None,
     ):
         self._downstream = downstream
         self._text_fields = text_fields
+        self._redactor = redactor or PIIRedactor()
 
     def __call__(self, event: Any) -> None:
-        redacted_data = _redact_text_fields(event.data, self._text_fields)
-        redacted_event = _replace_event_data(event, redacted_data)
-        self._downstream(redacted_event)
+        redacted_data = dict(event.data)
+        for key in self._text_fields:
+            if key in redacted_data and isinstance(redacted_data[key], str):
+                redacted_data[key] = self._redactor.redact(redacted_data[key])
+        from dataclasses import replace
 
-
-def _redact_text_fields(data: dict[str, Any], fields: frozenset[str]) -> dict[str, Any]:
-    result = dict(data)
-    for key in fields:
-        if key in result and isinstance(result[key], str):
-            result[key] = redact_pii(result[key])
-    return result
-
-
-def _replace_event_data(event: Any, new_data: dict[str, Any]) -> Any:
-    from dataclasses import replace
-
-    return replace(event, data=new_data)
+        self._downstream(replace(event, data=redacted_data))
