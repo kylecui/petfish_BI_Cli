@@ -1,0 +1,28 @@
+version: "1.0"
+name: "bi-cli-default"
+
+rules:
+  - name: "allow-read-tools"
+    priority: 100
+    when:
+      tool.capabilities_contains: "data:read"
+    effect: ALLOW
+
+  - name: "deny-write-tools"
+    priority: 200
+    when:
+      tool.side_effect: true
+    effect: DENY
+    reason: "BI agent cannot use tools with side effects"
+
+  - name: "deny-external-egress"
+    priority: 200
+    when:
+      tool.external_egress: true
+    effect: DENY
+    reason: "BI agent cannot make external network calls"
+
+  - name: "default-allow"
+    priority: 0
+    when: {}
+    effect: ALLOW
