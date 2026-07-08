@@ -50,12 +50,63 @@ def ask(
 @app.command()
 def sources():
     """List available data sources."""
-    from petfish_bi_cli.semantic import load_all_metadata
+    from petfish_bi_cli.config.settings import load_settings
+    from petfish_bi_cli.config.source_registry import SourceRegistry
 
-    semantic_dir = Path("references") / "semantic"
-    all_meta = load_all_metadata(semantic_dir)
-    for meta in all_meta.values():
-        typer.echo(f"  {meta.source_id} ({meta.source_type}): {meta.description}")
+    settings = load_settings()
+    registry = SourceRegistry(
+        config=settings.raw,
+        data_root=Path(settings.data.root),
+        semantic_dir=Path(settings.data.semantic_dir),
+    )
+    for decl in registry.all_sources().values():
+        typer.echo(f"  {decl.source_id} ({decl.type}): {decl.description}")
+
+
+@app.command()
+def health():
+    """Check if the system is properly configured."""
+    from petfish_bi_cli.config.settings import load_settings
+
+    try:
+        settings = load_settings()
+        data_root = Path(settings.data.root)
+        model_ok = settings.model.provider in ("fake", "openai", "anthropic")
+        data_ok = data_root.exists()
+        status = "ok" if (model_ok and data_ok) else "degraded"
+        typer.echo(
+            json.dumps(
+                {
+                    "status": status,
+                    "model_provider": settings.model.provider,
+                    "model_name": settings.model.name,
+                    "data_root": str(data_root),
+                    "data_root_exists": data_ok,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        if status != "ok":
+            raise typer.Exit(1) from None
+    except Exception as exc:
+        typer.echo(json.dumps({"status": "error", "error": str(exc)}, ensure_ascii=False))
+        raise typer.Exit(1) from exc
+
+
+@app.command()
+def web(
+    host: str = typer.Option("0.0.0.0", "--host", "-h", help="Bind address"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port number"),
+):
+    """Start the web API server."""
+    try:
+        import uvicorn
+
+        uvicorn.run("petfish_bi_cli.web:app", host=host, port=port)
+    except ImportError:
+        typer.echo("uvicorn not installed. Run: uv sync --extra web")
+        raise typer.Exit(1) from None
 
 
 if __name__ == "__main__":
