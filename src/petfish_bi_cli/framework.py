@@ -6,14 +6,10 @@ from petfishframework import Agent, YamlPolicy
 from petfishframework.permissions.model import DefaultAllowPolicy, PermissionPolicy
 
 from petfish_bi_cli.agent.strategy import BIAgentStrategy
-from petfish_bi_cli.agent.tools.cross_source import CrossSourceComparisonTool
-from petfish_bi_cli.agent.tools.cross_time import CrossTimeTool
-from petfish_bi_cli.agent.tools.explore import ExploreDataSourcesTool
-from petfish_bi_cli.agent.tools.load import LoadDataTool
-from petfish_bi_cli.agent.tools.sentiment import SentimentAnalysisTool
-from petfish_bi_cli.agent.tools.trend import TrendTool
+from petfish_bi_cli.agent.tool_factory import ToolFactory
 from petfish_bi_cli.config.model_factory import build_model
 from petfish_bi_cli.config.settings import Settings, load_settings
+from petfish_bi_cli.config.source_registry import SourceRegistry
 from petfish_bi_cli.grounding.claims import ClaimsRegistry
 
 _POLICY_PATH = Path("configs/policy.yml")
@@ -38,19 +34,14 @@ def make_bi_agent(
     if semantic_dir is None:
         semantic_dir = Path(settings.data.semantic_dir)
 
-    explore = ExploreDataSourcesTool(semantic_dir=semantic_dir)
-    load = LoadDataTool(data_root=data_root, registry=registry)
-    sentiment = SentimentAnalysisTool(
-        data_root=data_root, registry=registry
+    sources = SourceRegistry(
+        config=settings.raw,
+        data_root=data_root,
+        semantic_dir=semantic_dir,
     )
-    trend = TrendTool(data_root=data_root, registry=registry)
-    cross_source = CrossSourceComparisonTool(
-        data_root=data_root, registry=registry
-    )
-    cross_time = CrossTimeTool(data_root=data_root, registry=registry)
 
-    all_tools = (
-        explore, load, sentiment, trend, cross_source, cross_time,
+    all_tools = ToolFactory.build_all(
+        sources=sources, registry=registry, data_root=data_root,
     ) + tools
 
     policy = _load_policy()
