@@ -5,7 +5,7 @@ from typing import Any
 
 from petfishframework.core.contracts import RiskLevel, ToolResult
 
-from petfish_bi_cli.semantic import load_all_metadata
+from petfish_bi_cli.config.source_registry import SourceRegistry
 
 
 class ExploreDataSourcesTool:
@@ -34,28 +34,35 @@ class ExploreDataSourcesTool:
     requires_credentials = False
     credential_name: str | None = None
 
-    def __init__(self, semantic_dir: Path):
-        self._semantic_dir = semantic_dir
+    def __init__(
+        self,
+        sources: SourceRegistry | None = None,
+        semantic_dir: Path | None = None,
+    ):
+        if sources is None:
+            resolved = semantic_dir or Path("references/semantic")
+            sources = SourceRegistry(config={}, semantic_dir=resolved)
+        self._sources = sources
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
         source_id = args.get("source_id")
-        all_meta = load_all_metadata(self._semantic_dir)
+        all_sources = self._sources.all_sources()
 
         if source_id:
-            meta = all_meta.get(source_id)
-            if meta is None:
+            decl = all_sources.get(source_id)
+            if decl is None:
                 return ToolResult(error=f"Unknown source: {source_id}")
-            return ToolResult(value=_meta_to_summary(meta))
+            return ToolResult(value=_decl_to_summary(decl))
 
-        summaries = [_meta_to_summary(meta) for meta in all_meta.values()]
+        summaries = [_decl_to_summary(decl) for decl in all_sources.values()]
         return ToolResult(value={"sources": summaries, "count": len(summaries)})
 
 
-def _meta_to_summary(meta) -> dict:
+def _decl_to_summary(decl) -> dict:
     return {
-        "source_id": meta.source_id,
-        "type": meta.source_type,
-        "description": meta.description,
-        "metrics": [m["name"] for m in meta.metrics],
-        "example_questions": list(meta.example_questions),
+        "source_id": decl.source_id,
+        "type": decl.type,
+        "description": decl.description,
+        "metrics": [m.name for m in decl.metrics],
+        "example_questions": list(decl.example_questions),
     }
