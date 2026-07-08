@@ -6,9 +6,11 @@ from pathlib import Path
 import typer
 
 from petfish_bi_cli.application import BIApplication
+from petfish_bi_cli.cli.config_cmd import config_app
 from petfish_bi_cli.domain import BIQuery
 
 app = typer.Typer(help="AI for BI CLI — query e-commerce data via natural language.")
+app.add_typer(config_app, name="config")
 
 
 @app.command()

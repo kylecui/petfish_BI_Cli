@@ -51,12 +51,23 @@ def make_bi_agent(
     if isinstance(policy, YamlPolicy):
         policy.register_tools(all_tools)
 
+    retriever = _build_retriever(settings, data_root)
+
     return Agent(
         model=model,
         reasoning=BIAgentStrategy(),
         tools=all_tools,
         permission_policy=policy,
+        retriever=retriever,
     )
+
+
+def _build_retriever(settings: Settings, data_root: Path):
+    if not settings.rag.enabled:
+        return None
+    from petfish_bi_cli.config.rag_loader import build_retriever
+
+    return build_retriever(settings.raw)
 
 
 def _load_policy() -> PermissionPolicy:

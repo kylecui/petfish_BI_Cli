@@ -40,12 +40,22 @@ class VaultConfig:
 
 
 @dataclass(frozen=True)
+class RagConfig:
+    enabled: bool = False
+    retriever: str = "crag"
+    chunk_size: int = 500
+    top_k: int = 5
+    documents: tuple = ()
+
+
+@dataclass(frozen=True)
 class Settings:
     model: ModelConfig = field(default_factory=ModelConfig)
     roles: dict[str, ModelConfig] = field(default_factory=dict)
     budget: BudgetConfig = field(default_factory=BudgetConfig)
     data: DataConfig = field(default_factory=DataConfig)
     vault: VaultConfig = field(default_factory=VaultConfig)
+    rag: RagConfig = field(default_factory=RagConfig)
     raw: dict[str, Any] = field(default_factory=dict, repr=False)
 
     @property
@@ -228,11 +238,21 @@ def _build_settings(raw: dict) -> Settings:
         api_key_path=vault_raw.get("api_key_path"),
     )
 
+    rag_raw = raw.get("rag", {})
+    rag = RagConfig(
+        enabled=rag_raw.get("enabled", False),
+        retriever=rag_raw.get("retriever", "crag"),
+        chunk_size=rag_raw.get("chunk_size", 500),
+        top_k=rag_raw.get("top_k", 5),
+        documents=tuple(rag_raw.get("documents", [])),
+    )
+
     return Settings(
         model=model,
         roles=roles,
         budget=budget,
         data=data,
         vault=vault,
+        rag=rag,
         raw=raw,
     )
