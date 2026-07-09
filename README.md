@@ -9,17 +9,34 @@
 ## Architecture
 
 ```text
-Client (CLI query)
+Client (CLI / Web API)
    │
    ▼
-┌─────────────────────────────────────┐
-│  Agent (petfishframework)           │
-│  model + ReAct reasoning + tools    │
-│  ├─ CSVIngestionTool                │  ← references/*.csv
-│  ├─ JSONIngestionTool               │  ← references/*.json
-│  ├─ AnalysisTool                    │
-│  └─ ReportTool                      │  → outputs/*.json
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  BIApplication                                │
+│  ├── Agent (petfishframework)                 │
+│  │   model + ReAct + tools + permission       │
+│  │   ├── ExploreDataSourcesTool (config-driven)│
+│  │   ├── LoadDataTool (config-driven)          │
+│  │   ├── SentimentAnalysisTool                 │
+│  │   ├── TrendTool                             │
+│  │   ├── CrossSourceComparisonTool             │
+│  │   ├── CrossTimeTool                         │
+│  │   └── ScriptTool × N (customer scripts)     │
+│  │                                            │
+│  ├── Grounding: ClaimsRegistry + Validator    │
+│  ├── Permission: YamlPolicy + MASK            │
+│  ├── Audit: SIEMSink + PII Redaction          │
+│  └── Rendering: ReportRenderer (Jinja2)       │
+│                                              │
+│  Config: configs/bi_cli.yml                   │
+│  ├── model / budget / data                    │
+│  ├── sources (data source declarations)       │
+│  ├── scripts (customer BI scripts)            │
+│  ├── templates (output rendering)             │
+│  ├── rag (document retrieval)                 │
+│  └── vault (credential management)            │
+└──────────────────────────────────────────────┘
    │
    ▼
 JSON report (must-have) + rich content (nice-to-have)
@@ -39,41 +56,27 @@ JSON report (must-have) + rich content (nice-to-have)
 
 ## Quick Start
 
-本项目已验证 SiliconFlow Qwen2.5-72B-Instruct 模型。以下是实际可用的配置方式。
-
-### 方式一：SiliconFlow Qwen2.5-72B（已验证）
-
 ```bash
-# 1. 安装
-uv sync --extra dev --extra openai
+# 1. 一键安装
+./install.sh
 
-# 2. 配置 .env（从 .env.example 复制后填写）
-cp .env.example .env
-# 编辑 .env：
-#   OPENAI_API_KEY=sk-your-siliconflow-key
-#   OPENAI_BASE_URL=https://api.siliconflow.cn/v1
-
-# 3. 配置 configs/bi_cli.yml
-# 编辑 model.name 为 Qwen/Qwen2.5-72B-Instruct
-
-# 4. 运行
-uv run petfish-bi ask "CROCS在京东的均价是多少？"
-
-# 5. 测试（FakeModel，无需 API key）
-uv run pytest
-```
-
-### 方式二：OpenAI GPT-4o（未验证但应兼容）
-
-```bash
-uv sync --extra dev --extra openai
+# 2. 配置（或运行 petfish-bi config init 交互式生成）
+cp configs/bi_cli.example.yml configs/bi_cli.yml
 export OPENAI_API_KEY="sk-..."
-uv run petfish-bi ask "CROCS在京东的均价是多少？"
+
+# 3. 查询
+petfish-bi ask "CROCS在京东的均价是多少？"
+
+# 4. 健康检查
+petfish-bi health
+
+# 5. 启动 Web API
+petfish-bi web
 ```
 
-### 样例输出
+详细使用说明见 [docs/user-guide.md](docs/user-guide.md)。
 
-查看 `outputs/sample-*.json` 了解真实查询的 JSON 报告格式。
+部署指南见 [DEPLOY.md](DEPLOY.md)。
 
 ## Development
 
