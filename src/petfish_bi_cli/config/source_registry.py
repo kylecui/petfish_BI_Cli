@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from petfish_bi_cli.config.auto_detect import detect_format, infer_metrics
+from petfish_bi_cli.config.field_mapping import FieldMapper, SourceError
 from petfish_bi_cli.semantic import SourceMetadata, load_all_metadata
 
 _VALID_TYPES = frozenset({"json", "csv", "jsonl"})
@@ -90,19 +91,31 @@ class SourceRegistry:
         config: dict[str, Any],
         data_root: Path | None = None,
         semantic_dir: Path | None = None,
+        field_mapper: FieldMapper | None = None,
     ):
         self._data_root = data_root or Path("references")
         self._semantic_dir = semantic_dir or self._data_root / "semantic"
+        self._field_mapper = field_mapper or FieldMapper.default()
         self._sources: dict[str, SourceDeclaration] = {}
+        self._errors: list[SourceError] = []
 
         sources_config = config.get("sources")
         if sources_config:
             for source_id, spec in sources_config.items():
-                self._sources[source_id] = self._parse_source(source_id, spec)
+                try:
+                    self._sources[source_id] = self._parse_source(source_id, spec)
+                except Exception as exc:
+                    self._errors.append(
+                        SourceError(source_id, str(spec.get("path", "")), str(exc))
+                    )
         else:
             self._sources = self._load_from_semantic_dir()
             if not self._sources:
                 self._sources = self._scan_directory()
+
+    @property
+    def errors(self) -> list[SourceError]:
+        return list(self._errors)
 
     def get(self, source_id: str) -> SourceDeclaration | None:
         return self._sources.get(source_id)
@@ -195,6 +208,11 @@ class SourceRegistry:
                 description=fm.get("description", ""),
             )
 
+        if not fields_meta and resolved_path.exists():
+            fields_meta = self._load_sidecar_metadata(resolved_path)
+        if not fields_meta and resolved_path.exists():
+            fields_meta = self._auto_match_fields(resolved_path, source_type)
+
         return SourceDeclaration(
             source_id=source_id,
             type=source_type,
@@ -218,26 +236,82 @@ class SourceRegistry:
             source_id = f.stem.lower().replace("-", "_").replace(" ", "_")
             try:
                 source_type = detect_format(f)
-            except ValueError:
-                continue
-            inferred = infer_metrics(f, source_type)
-            metrics = tuple(
-                MetricSpec(
-                    name=m["name"],
-                    column=m.get("column", ""),
-                    aggregation=m.get("aggregation", "count"),
+                inferred = infer_metrics(f, source_type)
+                metrics = tuple(
+                    MetricSpec(
+                        name=m["name"],
+                        column=m.get("column", ""),
+                        aggregation=m.get("aggregation", "count"),
+                    )
+                    for m in inferred
                 )
-                for m in inferred
-            )
-            result[source_id] = SourceDeclaration(
-                source_id=source_id,
-                type=source_type,
-                path=f,
-                description=f.stem,
-                metrics=metrics,
-                file_pattern=f.name,
-            )
+                fields_meta = self._load_sidecar_metadata(f)
+                if not fields_meta:
+                    fields_meta = self._auto_match_fields(f, source_type)
+                result[source_id] = SourceDeclaration(
+                    source_id=source_id,
+                    type=source_type,
+                    path=f,
+                    description=f.stem,
+                    metrics=metrics,
+                    fields=fields_meta,
+                    file_pattern=f.name,
+                )
+            except Exception as exc:
+                self._errors.append(SourceError(source_id, str(f), str(exc)))
         return result
+
+    def _load_sidecar_metadata(self, data_path: Path) -> dict[str, FieldMetadata]:
+        sidecar = data_path.with_suffix(".meta.yml")
+        if not sidecar.exists():
+            sidecar = data_path.with_suffix(".meta.yaml")
+        if not sidecar.exists():
+            return {}
+        try:
+            import yaml
+
+            with open(sidecar, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+        except Exception:
+            return {}
+        fields_meta: dict[str, FieldMetadata] = {}
+        for col, fm in data.get("fields", {}).items():
+            fields_meta[col] = FieldMetadata(
+                column=col,
+                meaning=fm.get("meaning", ""),
+                unit=fm.get("unit", ""),
+                aliases=tuple(fm.get("aliases", [])),
+                mapping=dict(fm.get("mapping", {})),
+                description=fm.get("description", ""),
+            )
+        return fields_meta
+
+    def _auto_match_fields(self, data_path: Path, source_type: str) -> dict[str, FieldMetadata]:
+        try:
+            from petfish_bi_cli.config.auto_detect import _extract_json_items
+
+            if source_type == "csv":
+                import csv
+
+                with open(data_path, encoding="utf-8-sig", newline="") as f:
+                    reader = csv.DictReader(f)
+                    columns = reader.fieldnames or []
+            else:
+                items = _extract_json_items(data_path, source_type)
+                columns = list(items[0].keys()) if items and isinstance(items[0], dict) else []
+        except Exception:
+            return {}
+        fields_meta: dict[str, FieldMetadata] = {}
+        for col in columns:
+            matched = self._field_mapper.match(col)
+            if matched:
+                meaning, meta = matched
+                fields_meta[col] = FieldMetadata(
+                    column=col,
+                    meaning=meaning,
+                    unit=meta.get("unit", ""),
+                )
+        return fields_meta
 
     def _load_from_semantic_dir(self) -> dict[str, SourceDeclaration]:
         """Fallback: load from semantic/*.yml using legacy loader."""

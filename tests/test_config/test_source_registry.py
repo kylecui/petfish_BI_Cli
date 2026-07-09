@@ -129,8 +129,9 @@ class TestSourceRegistryParsing:
                 "bad": {"type": "xml", "path": "bad.xml"},
             }
         }
-        with pytest.raises(ValueError, match="Unknown source type"):
-            SourceRegistry(config=bad_config, data_root=data_root)
+        registry = SourceRegistry(config=bad_config, data_root=data_root)
+        assert "bad" not in registry.all_sources()
+        assert any("Unknown source type" in e.error for e in registry.errors)
 
 
 # ---------------------------------------------------------------------------

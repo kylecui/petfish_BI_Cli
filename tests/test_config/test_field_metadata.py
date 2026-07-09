@@ -108,16 +108,22 @@ class TestFindFieldByAlias:
 
 
 class TestNoMetadata:
-    def test_empty_fields_when_no_metadata(self):
+    def test_auto_match_fills_fields(self):
         config = {"sources": {"test": {"path": "mock_jd_products.json"}}}
         registry = SourceRegistry(config=config, data_root=DATA_ROOT)
+        decl = registry.get("test")
+        assert decl is not None
+        assert len(decl.fields) > 0
+        assert decl.find_field_by_meaning("price") is not None
+
+    def test_no_fields_when_columns_dont_match(self, tmp_path):
+        import json
+
+        data_file = tmp_path / "test.json"
+        data_file.write_text(json.dumps({"items": [{"xyz_field": 100}]}))
+        config = {"sources": {"test": {"path": "test.json"}}}
+        registry = SourceRegistry(config=config, data_root=tmp_path)
         decl = registry.get("test")
         assert decl is not None
         assert len(decl.fields) == 0
-
-    def test_find_returns_none_without_metadata(self):
-        config = {"sources": {"test": {"path": "mock_jd_products.json"}}}
-        registry = SourceRegistry(config=config, data_root=DATA_ROOT)
-        decl = registry.get("test")
-        assert decl is not None
         assert decl.find_field_by_meaning("price") is None

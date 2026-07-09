@@ -34,13 +34,10 @@ def detect_format(path: Path) -> str:
 
 
 def infer_metrics(path: Path, source_type: str) -> list[dict[str, Any]]:
-    try:
-        if source_type == "csv":
-            return _infer_csv_metrics(path)
-        if source_type in ("json", "jsonl"):
-            return _infer_json_metrics(path, source_type)
-    except Exception:
-        pass
+    if source_type == "csv":
+        return _infer_csv_metrics(path)
+    if source_type in ("json", "jsonl"):
+        return _infer_json_metrics(path, source_type)
     return [{"name": "item_count", "aggregation": "count"}]
 
 
