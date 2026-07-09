@@ -17,6 +17,22 @@ from petfish_bi_cli.semantic import SourceMetadata, load_all_metadata
 _VALID_TYPES = frozenset({"json", "csv", "jsonl"})
 _DATA_EXTENSIONS = frozenset({".json", ".csv", ".jsonl"})
 
+_SEMANTIC_MEANINGS = frozenset({
+    "price", "product_name", "shop_name", "comment_text",
+    "timestamp", "brand", "category", "user_id", "item_id",
+    "sentiment", "rating", "sales_volume", "stock",
+})
+
+
+@dataclass(frozen=True)
+class FieldMetadata:
+    column: str
+    meaning: str = ""
+    unit: str = ""
+    aliases: tuple[str, ...] = ()
+    mapping: dict[str, str] = field(default_factory=dict)
+    description: str = ""
+
 
 @dataclass(frozen=True)
 class MetricSpec:
@@ -46,8 +62,24 @@ class SourceDeclaration:
     schema: dict[str, Any] = field(default_factory=dict)
     metrics: tuple[MetricSpec, ...] = ()
     entities: tuple[EntitySpec, ...] = ()
+    fields: dict[str, FieldMetadata] = field(default_factory=dict)
     example_questions: tuple[str, ...] = ()
     file_pattern: str = ""
+
+    def find_field_by_meaning(self, meaning: str) -> str | None:
+        for column, meta in self.fields.items():
+            if meta.meaning == meaning:
+                return column
+        return None
+
+    def find_field_by_alias(self, alias: str) -> str | None:
+        alias_lower = alias.lower()
+        for column, meta in self.fields.items():
+            if alias_lower in [a.lower() for a in meta.aliases]:
+                return column
+            if alias_lower == column.lower():
+                return column
+        return None
 
 
 class SourceRegistry:
@@ -152,6 +184,17 @@ class SourceRegistry:
             for e in spec.get("entities", [])
         )
 
+        fields_meta = {}
+        for col, fm in spec.get("metadata", {}).get("fields", {}).items():
+            fields_meta[col] = FieldMetadata(
+                column=col,
+                meaning=fm.get("meaning", ""),
+                unit=fm.get("unit", ""),
+                aliases=tuple(fm.get("aliases", [])),
+                mapping=dict(fm.get("mapping", {})),
+                description=fm.get("description", ""),
+            )
+
         return SourceDeclaration(
             source_id=source_id,
             type=source_type,
@@ -160,6 +203,7 @@ class SourceRegistry:
             schema=spec.get("schema", {}),
             metrics=metrics,
             entities=entities,
+            fields=fields_meta,
             example_questions=tuple(spec.get("example_questions", [])),
             file_pattern=spec.get("file_pattern", spec.get("path", "")),
         )

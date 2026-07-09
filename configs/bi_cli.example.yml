@@ -33,6 +33,19 @@ data:
 #         column: price
 #         aggregation: avg
 #         unit: CNY
+#     metadata:
+#       fields:
+#         price:
+#           meaning: price              # price | product_name | shop_name |
+#           unit: CNY                   # comment_text | timestamp | brand |
+#           aliases: [均价, 实付价]      # category | user_id | item_id |
+#         title:                        # sentiment | rating | sales_volume
+#           meaning: product_name
+#           aliases: [商品名]
+#         shop:
+#           meaning: shop_name
+#         comment:
+#           meaning: comment_text
 
 # BI Scripts — wrap customer scripts as Agent-callable tools.
 # scripts:
