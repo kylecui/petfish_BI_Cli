@@ -103,14 +103,14 @@ def _extract_json_items(path: Path, source_type: str) -> list[dict]:
         return items
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
+    if isinstance(data, list):
+        return data
     results = data.get("raw_data", {}).get("search_results", [])
     if not results:
         for v in data.values():
             if isinstance(v, list) and v and isinstance(v[0], dict):
                 results = v
                 break
-    if not results and isinstance(data, list):
-        results = data
     if not results and isinstance(data, dict):
         results = [data]
     return results if isinstance(results, list) else []

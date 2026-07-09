@@ -66,6 +66,7 @@ class SourceDeclaration:
     fields: dict[str, FieldMetadata] = field(default_factory=dict)
     example_questions: tuple[str, ...] = ()
     file_pattern: str = ""
+    data_files: tuple[Path, ...] = ()
 
     def find_field_by_meaning(self, meaning: str) -> str | None:
         for column, meta in self.fields.items():
@@ -127,6 +128,8 @@ class SourceRegistry:
         decl = self._sources.get(source_id)
         if decl is None:
             return None
+        if decl.data_files:
+            return decl.data_files[0]
         if decl.path and decl.path.exists():
             return decl.path
         if decl.file_pattern:
@@ -139,6 +142,15 @@ class SourceRegistry:
                 if candidate.exists():
                     return candidate
         return None
+
+    def resolve_data_files(self, source_id: str) -> tuple[Path, ...]:
+        decl = self._sources.get(source_id)
+        if decl is None:
+            return ()
+        if decl.data_files:
+            return decl.data_files
+        path = self.resolve_path(source_id)
+        return (path,) if path else ()
 
     def to_metadata(self) -> dict[str, SourceMetadata]:
         """Convert declarations to legacy SourceMetadata for backward compat."""
@@ -230,9 +242,21 @@ class SourceRegistry:
         result: dict[str, SourceDeclaration] = {}
         if not self._data_root.exists():
             return result
-        for f in sorted(self._data_root.iterdir()):
-            if not f.is_file() or f.suffix.lower() not in _DATA_EXTENSIONS:
+        for entry in sorted(self._data_root.iterdir()):
+            if entry.is_dir():
+                meta_file = entry / "metadata.yml"
+                if not meta_file.exists():
+                    meta_file = entry / "metadata.yaml"
+                if meta_file.exists():
+                    source_id = entry.name.lower().replace("-", "_").replace(" ", "_")
+                    try:
+                        result[source_id] = self._load_directory_source(source_id, entry, meta_file)
+                    except Exception as exc:
+                        self._errors.append(SourceError(source_id, str(entry), str(exc)))
+                    continue
+            if not entry.is_file() or entry.suffix.lower() not in _DATA_EXTENSIONS:
                 continue
+            f = entry
             source_id = f.stem.lower().replace("-", "_").replace(" ", "_")
             try:
                 source_type = detect_format(f)
@@ -256,10 +280,81 @@ class SourceRegistry:
                     metrics=metrics,
                     fields=fields_meta,
                     file_pattern=f.name,
+                    data_files=(f,),
                 )
             except Exception as exc:
                 self._errors.append(SourceError(source_id, str(f), str(exc)))
         return result
+
+    def _load_directory_source(
+        self, source_id: str, directory: Path, meta_file: Path,
+    ) -> SourceDeclaration:
+        import yaml
+
+        with open(meta_file, encoding="utf-8") as f:
+            meta = yaml.safe_load(f) or {}
+
+        source_type = meta.get("type", "json")
+        if source_type not in _VALID_TYPES:
+            raise ValueError(
+                f"Unknown source type '{source_type}' in {meta_file}. "
+                f"Valid types: {', '.join(sorted(_VALID_TYPES))}"
+            )
+
+        ext_map = {"json": ".json", "csv": ".csv", "jsonl": ".jsonl"}
+        ext = ext_map.get(source_type, ".json")
+        data_files = tuple(sorted(directory.glob(f"*{ext}")))
+
+        if not data_files:
+            raise FileNotFoundError(f"No {ext} files in {directory}")
+
+        metrics = tuple(
+            MetricSpec(
+                name=m["name"],
+                column=m.get("column", ""),
+                aggregation=m.get("aggregation", "count"),
+                unit=m.get("unit", ""),
+                aliases=tuple(m.get("aliases", [])),
+                compute=m.get("compute", ""),
+            )
+            for m in meta.get("metrics", [])
+        )
+        if not metrics and data_files:
+            inferred = infer_metrics(data_files[0], source_type)
+            metrics = tuple(
+                MetricSpec(
+                    name=m["name"],
+                    column=m.get("column", ""),
+                    aggregation=m.get("aggregation", "count"),
+                )
+                for m in inferred
+            )
+
+        fields_meta: dict[str, FieldMetadata] = {}
+        for col, fm in meta.get("fields", {}).items():
+            fields_meta[col] = FieldMetadata(
+                column=col,
+                meaning=fm.get("meaning", ""),
+                unit=fm.get("unit", ""),
+                aliases=tuple(fm.get("aliases", [])),
+                mapping=dict(fm.get("mapping", {})),
+                description=fm.get("description", ""),
+            )
+        if not fields_meta and data_files:
+            fields_meta = self._auto_match_fields(data_files[0], source_type)
+
+        return SourceDeclaration(
+            source_id=source_id,
+            type=source_type,
+            path=directory,
+            description=meta.get("description", directory.name),
+            schema=meta.get("schema", {}),
+            metrics=metrics,
+            fields=fields_meta,
+            example_questions=tuple(meta.get("example_questions", [])),
+            file_pattern="",
+            data_files=data_files,
+        )
 
     def _load_sidecar_metadata(self, data_path: Path) -> dict[str, FieldMetadata]:
         sidecar = data_path.with_suffix(".meta.yml")
