@@ -120,6 +120,7 @@ scripts:
     timeout_s: 30                       # 超时秒数（最大 300）
     risk_level: medium                  # low | medium | high
     capabilities: ["data:read"]
+    sandbox_env: true                   # 过滤环境变量，仅保留 PATH/HOME/USER
 ```
 
 脚本执行机制：
@@ -127,6 +128,7 @@ scripts:
 - stdout 输出（JSON 格式时自动解析 + 注册 Claim）
 - 非零退出码或超时返回错误
 - 默认 `side_effect: true`，权限策略默认拒绝（需显式允许）
+- `sandbox_env: true` 时，脚本仅能访问 PATH/HOME/USER/LANG 环境变量，API Key 等敏感信息不会泄露到客户脚本
 
 权限策略中添加允许规则：
 
@@ -238,6 +240,40 @@ budget:
   max_steps: 25
 ```
 
+### 3.9 推理策略
+
+Agent 默认使用 ReAct（推理+行动）策略。可选启用 Reflexion 自反思模式：
+
+```yaml
+reasoning:
+  reflexion: true            # 启用自反思重试
+  max_reflections: 2         # 最大反思轮次（默认 2）
+```
+
+启用后，Agent 在回答不理想时自动：
+1. 反思上次尝试失败的原因
+2. 生成"经验教训"
+3. 带着教训重试
+4. 最多重试 `max_reflections` 次，取最优结果
+
+适用场景：复杂对比分析、多步骤推理、首次回答 validation_failed 时。
+
+### 3.10 熔断保护
+
+模型 API（SiliconFlow/OpenAI）连续失败时自动触发熔断，避免雪崩：
+
+```yaml
+# 在 model_factory 中自动生效，无需配置
+# 默认参数：连续 5 次失败 → 开路 → 冷却 60s → 半开试探
+```
+
+熔断状态：
+- **CLOSED**（正常）→ 调用通过
+- **OPEN**（熔断）→ 直接拒绝调用，不消耗 Token
+- **HALF_OPEN**（试探）→ 允许一次调用，成功则恢复 CLOSED
+
+适用场景：SiliconFlow 限流、OpenAI 服务波动、网络抖动。
+
 ## 4. CLI 参考
 
 ### 4.1 ask — 查询
@@ -291,7 +327,12 @@ petfish-bi health
 ```bash
 petfish-bi web --port 8000
 petfish-bi web --host 0.0.0.0 --port 8080
+petfish-bi web --no-hot-reload-policy    # 禁用策略热重载
 ```
+
+Web 启动时自动：
+- 挂载 PolicyHotReloader 监视 `configs/policy.yml`（修改后自动重载，无需重启）
+- 初始化 ConversationStore（支持 `/chat` 多轮对话）
 
 ### 4.5 config — 配置管理
 
@@ -312,17 +353,46 @@ curl -X POST http://localhost:8000/analyze \
 
 返回 JSON 报告（同 CLI `ask` 命令）。
 
-### 5.2 GET /health
+### 5.2 POST /chat — 多轮对话
+
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"query": "CROCS京东均价", "conversation_id": "conv-001"}'
+```
+
+响应：
+
+```json
+{
+  "conversation_id": "conv-001",
+  "answer": "CROCS在京东的平均价格为561.01元。",
+  "data": {"findings": [{"metric": "avg_price_jd", "value": 561.01}]},
+  "status": "ok"
+}
+```
+
+`conversation_id` 可省略（自动生成）。同一 `conversation_id` 的多次调用构成一个对话会话。
+
+### 5.3 GET /health
 
 ```bash
 curl http://localhost:8000/health
 ```
 
-### 5.3 GET /sources
+### 5.4 GET /sources
 
 ```bash
 curl http://localhost:8000/sources
 ```
+
+### 5.5 GET /jobs/{job_id}
+
+```bash
+curl http://localhost:8000/jobs/abc123
+```
+
+查询异步 `/analyze` 任务的结果。
 
 ## 6. 数据源接入指南
 
@@ -445,3 +515,15 @@ model:
   provider: openai
   name: Qwen/Qwen2.5-72B-Instruct
 ```
+
+### Q: 熔断器触发后怎么办
+
+模型 API 连续失败 5 次后熔断器开路，调用直接拒绝。等待 60 秒后自动进入半开状态试探恢复。如需手动恢复，重启服务即可（熔断器是进程内状态）。
+
+### Q: Reflexion 和普通 ReAct 有什么区别
+
+ReAct 执行一次推理链。Reflexion 在 ReAct 基础上增加"反思→重试"循环：如果首次回答不理想，Agent 会反思原因并带着经验教训重试。代价是消耗更多 Token（每次反思额外调用模型）。
+
+### Q: 客户脚本会泄露 API Key 吗
+
+当 `sandbox_env: true` 时，脚本只能访问 PATH/HOME/USER/LANG 环境变量。OPENAI_API_KEY、VAULT_TOKEN 等敏感变量被过滤。默认 `sandbox_env: false`（不过滤），建议对不信任的脚本启用。
