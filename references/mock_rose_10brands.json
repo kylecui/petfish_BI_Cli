@@ -1,0 +1,5 @@
+{"timestamp": "2026-01-01 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"brand": "CROCS", "product_name": "CROCS 产品 mock-1", "price": "250.0", "platform": "jd", "shop": "CROCS旗舰店"}]}
+{"timestamp": "2026-01-02 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"brand": "HUGO BOSS", "product_name": "HUGO BOSS 产品 mock-2", "price": "300.0", "platform": "jd", "shop": "HUGO BOSS旗舰店"}]}
+{"timestamp": "2026-01-03 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"brand": "UGG", "product_name": "UGG 产品 mock-3", "price": "350.0", "platform": "jd", "shop": "UGG旗舰店"}]}
+{"timestamp": "2026-01-04 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"brand": "NIKE", "product_name": "NIKE 产品 mock-4", "price": "400.0", "platform": "jd", "shop": "NIKE旗舰店"}]}
+{"timestamp": "2026-01-05 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"brand": "ADIDAS", "product_name": "ADIDAS 产品 mock-5", "price": "450.0", "platform": "jd", "shop": "ADIDAS旗舰店"}]}

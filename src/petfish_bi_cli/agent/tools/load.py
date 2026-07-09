@@ -30,6 +30,12 @@ _KNOWN_FILE_PATTERNS = {
     "rose_10brands": "ROSE_10BRANDS_Raw_Dump.json",
 }
 
+_MOCK_FILE_PATTERNS = {
+    "jd_products": "mock_jd_products.json",
+    "tmall_products": "mock_tmall_products.json",
+    "rose_10brands": "mock_rose_10brands.json",
+}
+
 
 class LoadDataTool:
     """Tool for loading data from a BI source. Returns claims with IDs."""
@@ -124,6 +130,10 @@ class LoadDataTool:
     def _load_crocs(self, metric: str, filters: dict | None) -> ToolResult:
         csv_files = glob.glob(str(self._data_root / "CROCS_*.csv"))
         if not csv_files:
+            mock_path = self._data_root / "mock_crocs_xiaohongshu.csv"
+            if mock_path.exists():
+                csv_files = [str(mock_path)]
+        if not csv_files:
             return ToolResult(error="No CROCS CSV file found")
         records = parse_crocs_csv(Path(csv_files[0]))
 
@@ -166,6 +176,11 @@ class LoadDataTool:
         pattern = decl.file_pattern or _KNOWN_FILE_PATTERNS.get(source_id, "")
         if pattern:
             candidate = self._data_root / pattern
+            if candidate.exists():
+                return candidate
+        mock_pattern = _MOCK_FILE_PATTERNS.get(source_id, "")
+        if mock_pattern:
+            candidate = self._data_root / mock_pattern
             if candidate.exists():
                 return candidate
         return None

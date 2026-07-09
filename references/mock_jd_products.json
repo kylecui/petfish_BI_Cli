@@ -1,0 +1,42 @@
+{
+  "raw_data": {
+    "search_results": [
+      {
+        "skuId": "mock001",
+        "skuName": "CROCS Classic Clog 黑色 mock",
+        "calculatedFinalPrice": 299.0,
+        "originalPrice": 399.0,
+        "shopName": "Crocs官方旗舰店",
+        "isJdSelf": true,
+        "stockState": 1
+      },
+      {
+        "skuId": "mock002",
+        "skuName": "CROCS LiteRide 泡沫鞋 mock",
+        "calculatedFinalPrice": 349.0,
+        "originalPrice": 449.0,
+        "shopName": "Crocs官方旗舰店",
+        "isJdSelf": true,
+        "stockState": 1
+      },
+      {
+        "skuId": "mock003",
+        "skuName": "CROCS 经典洞洞鞋白色 mock",
+        "calculatedFinalPrice": 399.0,
+        "originalPrice": 499.0,
+        "shopName": "第三方鞋类专营店",
+        "isJdSelf": false,
+        "stockState": 1
+      },
+      {
+        "skuId": "mock004",
+        "skuName": "CROCS 全地形拖鞋 mock",
+        "calculatedFinalPrice": 449.0,
+        "originalPrice": 549.0,
+        "shopName": "Crocs官方旗舰店",
+        "isJdSelf": true,
+        "stockState": 1
+      }
+    ]
+  }
+}

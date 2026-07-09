@@ -1,0 +1,4 @@
+{"timestamp": "2026-01-01 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"itemId": "tmock001", "title": "CROCS 经典款洞洞鞋 mock-1", "price": "279.0", "shop": "crocs官方旗舰店"}]}
+{"timestamp": "2026-01-02 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"itemId": "tmock002", "title": "CROCS 经典款洞洞鞋 mock-2", "price": "319.0", "shop": "crocs官方旗舰店"}]}
+{"timestamp": "2026-01-03 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"itemId": "tmock003", "title": "CROCS 经典款洞洞鞋 mock-3", "price": "359.0", "shop": "品牌鞋类专营"}]}
+{"timestamp": "2026-01-04 10:00:00", "source_url": "https://example.com/mock", "extracted_items": [{"itemId": "tmock004", "title": "CROCS 经典款洞洞鞋 mock-4", "price": "399.0", "shop": "crocs官方旗舰店"}]}

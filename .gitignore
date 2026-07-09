@@ -37,3 +37,14 @@ __pycache__/
 
 # env files
 .env
+
+# Raw data — contains real e-commerce data, must not be public.
+# Mock data (mock_*.json/csv/html) is tracked for demonstration.
+references/JD_*.json
+references/TMALL_*.json
+references/ROSE_*.json
+references/ROSE_*.html
+references/CROCS_*.csv
+
+# Generated outputs — may contain real data values
+outputs/
