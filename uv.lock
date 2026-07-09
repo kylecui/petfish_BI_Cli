@@ -1219,7 +1219,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "2.44.0"
+version = "1.109.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -1231,9 +1231,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/49/f5/7c7cb955305cb41f7f3c5fd7e0e38bf6bbf2658468863d4b7b868a5cb8df/openai-2.44.0.tar.gz", hash = "sha256:68a5a5ffad82b8ff7d451c437529fb64f7c3b8123aaf0c021966a882d9e3947d", size = 988753, upload-time = "2026-06-24T20:56:02.293Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/a1/a303104dc55fc546a3f6914c842d3da471c64eec92043aef8f652eb6c524/openai-1.109.1.tar.gz", hash = "sha256:d173ed8dbca665892a6db099b4a2dfac624f94d20a93f46eb0b56aae940ed869", size = 564133, upload-time = "2025-09-24T13:00:53.075Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/f4/561ed79fd94876160018a5e75254cfcb9b0e62d4dded9dcb20072e86d623/openai-2.44.0-py3-none-any.whl", hash = "sha256:0a2a3ab2e29aeda368700f662ff9ba0f9df17ba4c54577a64e08b8115a3cc0ad", size = 1366216, upload-time = "2026-06-24T20:55:58.882Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/2a/7dd3d207ec669cacc1f186fd856a0f61dbc255d24f6fdc1a6715d6051b0f/openai-1.109.1-py3-none-any.whl", hash = "sha256:6bcaf57086cf59159b8e27447e4e7dd019db5d29a438072fbd49c290c7e65315", size = 948627, upload-time = "2025-09-24T13:00:50.754Z" },
 ]
 
 [[package]]
@@ -1496,10 +1496,10 @@ requires-dist = [
     { name = "opentelemetry-api", marker = "extra == 'otel'", specifier = ">=1.20" },
     { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.20" },
     { name = "pandas", marker = "extra == 'data'", specifier = ">=2.0" },
-    { name = "petfishframework", specifier = ">=0.4.1" },
-    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=0.4.1" },
-    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=0.4.1" },
-    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=0.4.1" },
+    { name = "petfishframework", specifier = ">=1.0.1" },
+    { name = "petfishframework", extras = ["anthropic"], marker = "extra == 'anthropic'", specifier = ">=1.0.1" },
+    { name = "petfishframework", extras = ["mcp"], marker = "extra == 'mcp'", specifier = ">=1.0.1" },
+    { name = "petfishframework", extras = ["openai"], marker = "extra == 'openai'", specifier = ">=1.0.1" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
@@ -1515,14 +1515,14 @@ provides-extras = ["openai", "anthropic", "mcp", "otel", "vault", "data", "senti
 
 [[package]]
 name = "petfishframework"
-version = "0.4.1"
+version = "1.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/9d/0a8b7822b53211ea6c1628a129d128ffe5a63d3ed31dd5b6b2e4118b35b5/petfishframework-0.4.1.tar.gz", hash = "sha256:b17f95cd6ce2b04b7a9e74e206599e803ea4adbe33b406e053c922d330d58627", size = 423070, upload-time = "2026-07-08T08:44:43.244Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/76/4e8d5c2184ab21a41c7146facd49fec97df2de28186740f158b02ac80350/petfishframework-1.0.1.tar.gz", hash = "sha256:22832cd2db00ca36cb0e910ad9a931fd4d72236aacd1c7724bbe77a69f7b40e0", size = 509468, upload-time = "2026-07-09T03:38:44.121Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/26/536059d2f0245520b6f9517168f4e1a100cf87d3f4808e779936baf67417/petfishframework-0.4.1-py3-none-any.whl", hash = "sha256:6515e42e5b052136d87f670a59343301ca9cfdcec617eefa46fe6ab535e93a04", size = 97405, upload-time = "2026-07-08T08:44:41.82Z" },
+    { url = "https://files.pythonhosted.org/packages/09/3a/cfb9b38153e20594ac8de7bf635403f0b684d32e1bffb065f60e41756c29/petfishframework-1.0.1-py3-none-any.whl", hash = "sha256:3f11dc92fda79f927ad713e71c0271f8d99ef76b9657d93898536415d986e45d", size = 123181, upload-time = "2026-07-09T03:38:42.92Z" },
 ]
 
 [package.optional-dependencies]
