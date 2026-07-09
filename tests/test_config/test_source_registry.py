@@ -18,7 +18,7 @@ SAMPLE_CONFIG_WITH_SOURCES = {
     "sources": {
         "jd_products": {
             "type": "json",
-            "path": "jd/JD_CROCS_Raw_Memory_Dump.json",
+            "path": "mock_jd_products.json",
             "description": "京东商品列表",
             "schema": {
                 "json_path": "raw_data.search_results[]",
@@ -84,7 +84,7 @@ class TestSourceRegistryParsing:
         assert decl.source_id == "jd_products"
         assert decl.type == "json"
         assert decl.description == "京东商品列表"
-        assert decl.path == data_root / "jd" / "JD_CROCS_Raw_Memory_Dump.json"
+        assert decl.path == data_root / "mock_jd_products.json"
 
     def test_metrics_parsed_correctly(self, tmp_path):
         data_root = tmp_path / "data"

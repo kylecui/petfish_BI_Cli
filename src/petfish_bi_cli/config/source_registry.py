@@ -1,8 +1,9 @@
 """SourceRegistry — config-driven data source declarations.
 
-Replaces the file-based semantic/*.yml loading with config-section-driven
-source declarations. Falls back to semantic/*.yml when no `sources:` section
-is present in bi_cli.yml (backward compat).
+Three resolution levels:
+1. Explicit sources in config (type optional — auto-detected if omitted)
+2. Directory scan: no sources → auto-discover files in data.root
+3. Semantic YAML fallback: legacy references/semantic/*.yml
 """
 from __future__ import annotations
 
@@ -10,9 +11,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from petfish_bi_cli.config.auto_detect import detect_format, infer_metrics
 from petfish_bi_cli.semantic import SourceMetadata, load_all_metadata
 
 _VALID_TYPES = frozenset({"json", "csv", "jsonl"})
+_DATA_EXTENSIONS = frozenset({".json", ".csv", ".jsonl"})
 
 
 @dataclass(frozen=True)
@@ -66,6 +69,8 @@ class SourceRegistry:
                 self._sources[source_id] = self._parse_source(source_id, spec)
         else:
             self._sources = self._load_from_semantic_dir()
+            if not self._sources:
+                self._sources = self._scan_directory()
 
     def get(self, source_id: str) -> SourceDeclaration | None:
         return self._sources.get(source_id)
@@ -83,6 +88,11 @@ class SourceRegistry:
             candidate = self._data_root / decl.file_pattern
             if candidate.exists():
                 return candidate
+        for prefix in ("", "mock_"):
+            for ext in (".json", ".csv", ".jsonl"):
+                candidate = self._data_root / f"{prefix}{source_id}{ext}"
+                if candidate.exists():
+                    return candidate
         return None
 
     def to_metadata(self) -> dict[str, SourceMetadata]:
@@ -95,15 +105,19 @@ class SourceRegistry:
     # --- internals ---
 
     def _parse_source(self, source_id: str, spec: dict) -> SourceDeclaration:
-        source_type = spec.get("type", "json")
+        rel_path = Path(spec["path"]) if "path" in spec else Path("")
+        resolved_path = self._data_root / rel_path if not rel_path.is_absolute() else rel_path
+
+        source_type = spec.get("type")
+        if source_type is None and resolved_path.exists():
+            source_type = detect_format(resolved_path)
+        elif source_type is None:
+            source_type = "json"
         if source_type not in _VALID_TYPES:
             raise ValueError(
                 f"Unknown source type '{source_type}' for source '{source_id}'. "
                 f"Valid types: {', '.join(sorted(_VALID_TYPES))}"
             )
-
-        rel_path = Path(spec["path"]) if "path" in spec else Path("")
-        resolved_path = self._data_root / rel_path if not rel_path.is_absolute() else rel_path
 
         metrics = tuple(
             MetricSpec(
@@ -116,6 +130,16 @@ class SourceRegistry:
             )
             for m in spec.get("metrics", [])
         )
+        if not metrics and resolved_path.exists():
+            inferred = infer_metrics(resolved_path, source_type)
+            metrics = tuple(
+                MetricSpec(
+                    name=m["name"],
+                    column=m.get("column", ""),
+                    aggregation=m.get("aggregation", "count"),
+                )
+                for m in inferred
+            )
 
         entities = tuple(
             EntitySpec(
@@ -139,6 +163,37 @@ class SourceRegistry:
             example_questions=tuple(spec.get("example_questions", [])),
             file_pattern=spec.get("file_pattern", spec.get("path", "")),
         )
+
+    def _scan_directory(self) -> dict[str, SourceDeclaration]:
+        result: dict[str, SourceDeclaration] = {}
+        if not self._data_root.exists():
+            return result
+        for f in sorted(self._data_root.iterdir()):
+            if not f.is_file() or f.suffix.lower() not in _DATA_EXTENSIONS:
+                continue
+            source_id = f.stem.lower().replace("-", "_").replace(" ", "_")
+            try:
+                source_type = detect_format(f)
+            except ValueError:
+                continue
+            inferred = infer_metrics(f, source_type)
+            metrics = tuple(
+                MetricSpec(
+                    name=m["name"],
+                    column=m.get("column", ""),
+                    aggregation=m.get("aggregation", "count"),
+                )
+                for m in inferred
+            )
+            result[source_id] = SourceDeclaration(
+                source_id=source_id,
+                type=source_type,
+                path=f,
+                description=f.stem,
+                metrics=metrics,
+                file_pattern=f.name,
+            )
+        return result
 
     def _load_from_semantic_dir(self) -> dict[str, SourceDeclaration]:
         """Fallback: load from semantic/*.yml using legacy loader."""

@@ -13,9 +13,9 @@ _CONFIG_WITH_SOURCES = {
     "sources": {
         "jd_products": {
             "type": "json",
-            "path": "JD_CROCS_Raw_Memory_Dump.json",
+            "path": "mock_jd_products.json",
             "description": "京东CROCS商品",
-            "file_pattern": "JD_CROCS_Raw_Memory_Dump.json",
+            "file_pattern": "mock_jd_products.json",
             "metrics": [
                 {"name": "avg_price", "column": "calculatedFinalPrice", "aggregation": "avg"},
                 {"name": "product_count", "aggregation": "count"},

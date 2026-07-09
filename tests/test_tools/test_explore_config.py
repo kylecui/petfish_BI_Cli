@@ -11,18 +11,16 @@ DATA_ROOT = Path(__file__).parent.parent.parent / "references"
 _CONFIG_WITH_SOURCES = {
     "sources": {
         "jd_products": {
-            "type": "json",
-            "path": "JD_CROCS_Raw_Memory_Dump.json",
-            "description": "京东CROCS商品",
+            "path": "mock_jd_products.json",
+            "description": "JD products",
             "metrics": [
                 {"name": "avg_price", "column": "calculatedFinalPrice", "aggregation": "avg"},
                 {"name": "product_count", "aggregation": "count"},
             ],
         },
         "tmall_products": {
-            "type": "json",
-            "path": "TMALL_CROCS_Raw_Memory_Dump.json",
-            "description": "天猫CROCS商品",
+            "path": "mock_tmall_products.json",
+            "description": "TMALL products",
         },
     },
 }

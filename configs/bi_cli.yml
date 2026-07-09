@@ -36,21 +36,13 @@ data:
 
 sources:
   jd_products:
-    type: json
     path: mock_jd_products.json
-    description: "JD products"
   tmall_products:
-    type: json
     path: mock_tmall_products.json
-    description: "TMALL products"
   crocs_xiaohongshu:
-    type: csv
     path: mock_crocs_xiaohongshu.csv
-    description: "Xiaohongshu comments"
   rose_10brands:
-    type: json
     path: mock_rose_10brands.json
-    description: "Multi-brand comparison data"
 
 # HashiCorp Vault integration (requires: pip install petfish-bi-cli[vault])
 # vault:
