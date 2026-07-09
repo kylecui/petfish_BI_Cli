@@ -28,8 +28,8 @@ They allow the project to run and demonstrate functionality without real e-comme
 Place real data files alongside mock files. The system automatically prefers real data when available:
 
 ```bash
-# Copy your data
-cp my_jd_data.json references/JD_CROCS_Raw_Memory_Dump.json
+# Copy your data (any name, declare in bi_cli.yml sources:)
+cp my_jd_data.json references/my_jd_data.json
 
 # The tools will use real data automatically
 petfish-bi ask "均价是多少？"

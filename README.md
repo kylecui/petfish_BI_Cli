@@ -44,15 +44,16 @@ JSON report (must-have) + rich content (nice-to-have)
 
 ## Data Sources (references/)
 
-| 文件 | 类型 | 来源 |
-|---|---|---|
-| `CROCS_原始数据_20260605_144849.csv` | CSV | CROCS 商品数据 |
-| `JD_CROCS_Raw_Memory_Dump.json` | JSON | 京东 CROCS 原始 dump |
-| `TMALL_CROCS_Raw_Memory_Dump.json` | JSON | 天猫 CROCS 原始 dump |
-| `ROSE_10BRANDS_Raw_Dump.json` | JSON | ROSE 10 品牌原始 dump |
-| `ROSE_10BRANDS_Price_Intelligence_Report.html` | HTML | ROSE 价格情报报告样本 |
+仓库包含 mock 数据用于演示。放入真实数据后自动优先使用。
 
-⚠️ 各数据源格式不统一，每个源需独立 ingestion adapter。
+| Mock 文件 | 类型 | 对应数据源 |
+|---|---|---|
+| `mock_jd_products.json` | JSON | 京东商品价格 |
+| `mock_tmall_products.json` | JSON | 天猫商品价格 |
+| `mock_crocs_xiaohongshu.csv` | CSV | 小红书评论数据 |
+| `mock_rose_10brands.json` | JSON | 多品牌对比数据 |
+
+详见 `references/README.md`。
 
 ## Quick Start
 

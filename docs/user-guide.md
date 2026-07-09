@@ -79,7 +79,7 @@ export OPENAI_BASE_URL="https://api.siliconflow.cn/v1"
 sources:
   jd_products:
     type: json                          # json | csv | jsonl
-    path: jd/JD_CROCS_Raw_Memory_Dump.json
+    path: mock_jd_products.json
     description: "京东商品列表"
     schema:
       json_path: "raw_data.search_results[]"   # JSON dot-path（可选）
