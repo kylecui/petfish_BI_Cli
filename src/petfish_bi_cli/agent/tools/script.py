@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import uuid
 from dataclasses import dataclass, field
@@ -13,6 +14,8 @@ from petfish_bi_cli.grounding.claims import Claim, ClaimsRegistry
 
 _MAX_OUTPUT = 1_048_576
 
+_SANDBOX_ALLOWED_ENV = frozenset({"PATH", "HOME", "USER", "LANG", "LC_ALL", "SYSTEMROOT"})
+
 
 @dataclass(frozen=True)
 class ScriptConfig:
@@ -23,6 +26,7 @@ class ScriptConfig:
     timeout_s: int = 30
     risk_level: str = "medium"
     capabilities: tuple[str, ...] = ("data:read",)
+    sandbox_env: bool = False
 
 
 class ScriptTool:
@@ -46,6 +50,10 @@ class ScriptTool:
         self.credential_name: str | None = None
 
     def execute(self, args: dict[str, Any]) -> ToolResult:
+        run_env = None
+        if self._config.sandbox_env:
+            run_env = {k: v for k, v in os.environ.items() if k in _SANDBOX_ALLOWED_ENV}
+
         try:
             result = subprocess.run(
                 self._config.command,
@@ -54,6 +62,7 @@ class ScriptTool:
                 capture_output=True,
                 text=True,
                 timeout=self._config.timeout_s,
+                env=run_env,
             )
         except subprocess.TimeoutExpired:
             return ToolResult(error=f"Script timed out after {self._config.timeout_s}s")

@@ -100,8 +100,19 @@ def health():
 def web(
     host: str = typer.Option("0.0.0.0", "--host", "-h", help="Bind address"),
     port: int = typer.Option(8000, "--port", "-p", help="Port number"),
+    hot_reload_policy: bool = typer.Option(
+        True, "--hot-reload-policy/--no-hot-reload-policy",
+        help="Watch configs/policy.yml for changes",
+    ),
 ):
     """Start the web API server."""
+    if hot_reload_policy and Path("configs/policy.yml").exists():
+        from petfishframework.policies.hot_reload import PolicyHotReloader
+
+        reloader = PolicyHotReloader("configs/policy.yml")
+        reloader.start()
+        typer.echo("Policy hot-reloader started (watching configs/policy.yml)")
+
     try:
         import uvicorn
 

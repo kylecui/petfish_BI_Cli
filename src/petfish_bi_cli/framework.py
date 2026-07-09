@@ -53,13 +53,33 @@ def make_bi_agent(
 
     retriever = _build_retriever(settings, data_root)
 
+    reasoning = _build_reasoning(settings.raw)
+
     return Agent(
         model=model,
-        reasoning=BIAgentStrategy(),
+        reasoning=reasoning,
         tools=all_tools,
         permission_policy=policy,
         retriever=retriever,
     )
+
+
+def _build_reasoning(raw_config: dict):
+    """Build BIAgentStrategy, optionally wrapped in Reflexion."""
+    strategy = BIAgentStrategy()
+    if _should_use_reflexion(raw_config):
+        from petfishframework.reasoning.reflexion import Reflexion
+
+        max_reflections = raw_config.get("reasoning", {}).get("max_reflections", 2)
+        return Reflexion(
+            max_reflections=max_reflections,
+            inner_strategy=strategy,
+        )
+    return strategy
+
+
+def _should_use_reflexion(raw_config: dict) -> bool:
+    return bool(raw_config.get("reasoning", {}).get("reflexion", False))
 
 
 def _build_retriever(settings: Settings, data_root: Path):

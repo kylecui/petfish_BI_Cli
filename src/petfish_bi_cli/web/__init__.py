@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+import uuid
 
 from pydantic import BaseModel
 
@@ -19,6 +20,19 @@ class AnalyzeRequest(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     job_id: str
+    status: str
+
+
+class ChatRequest(BaseModel):
+    query: str
+    conversation_id: str | None = None
+    data_sources: list[str] = []
+
+
+class ChatResponse(BaseModel):
+    conversation_id: str
+    answer: str
+    data: dict
     status: str
 
 
@@ -40,6 +54,13 @@ def create_app():
     audit = get_audit_logger()
     sla = get_sla_tracker()
     metrics = get_metrics()
+
+    try:
+        from petfishframework.core.conversation import InMemoryConversationStore
+
+        InMemoryConversationStore()
+    except Exception:
+        pass
 
     @app.post("/analyze", response_model=AnalyzeResponse, status_code=202)
     async def analyze(
@@ -64,6 +85,29 @@ def create_app():
         metrics.record_query("analyze", elapsed)
         audit.log(key, redacted, "pending", elapsed, session_id=job_id)
         return AnalyzeResponse(job_id=job_id, status="pending")
+
+    @app.post("/chat", response_model=ChatResponse)
+    async def chat(
+        req: ChatRequest,
+        x_api_key: str | None = Header(None, alias="X-API-Key"),
+    ):
+        key = verify_api_key(x_api_key, sla_config)
+        allowed, reason = rate_limiter.check(key)
+        if not allowed:
+            raise HTTPException(status_code=429, detail=reason)
+
+        conversation_id = req.conversation_id or str(uuid.uuid4())
+
+        bi_query = BIQuery(prompt=req.query, data_sources=tuple(req.data_sources))
+        bi_app = BIApplication()
+        report = await asyncio.to_thread(bi_app.execute, bi_query)
+
+        return ChatResponse(
+            conversation_id=conversation_id,
+            answer=report.answer or "",
+            data=report.data or {},
+            status=report.status,
+        )
 
     @app.get("/jobs/{job_id}")
     async def get_job(
@@ -119,3 +163,9 @@ def create_app():
         return rate_limiter.remaining(key)
 
     return app
+
+
+try:
+    app = create_app()
+except Exception:
+    app = None
