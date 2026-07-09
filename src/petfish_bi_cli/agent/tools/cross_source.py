@@ -31,6 +31,7 @@ class CrossSourceComparisonTool:
     data_root: Path
     registry: ClaimsRegistry
     _claim_counter: int = field(default=0, repr=False)
+    sources: Any = None
 
     name: str = "compare_sources"
     description: str = "Compare metrics across data sources (e.g. JD vs TMALL price comparison)"
@@ -127,16 +128,17 @@ class CrossSourceComparisonTool:
         return claim
 
     def _load_prices(self, source: str) -> list[float]:
+        path = None
+        if self.sources is not None:
+            path = self.sources.resolve_path(source)
+        if path is None:
+            return []
         if source == "jd_products":
-            path = self.data_root / "JD_CROCS_Raw_Memory_Dump.json"
             products = parse_jd_json(path)
-            return [p.price for p in products if p.price > 0]
         elif source == "tmall_products":
-            path = self.data_root / "TMALL_CROCS_Raw_Memory_Dump.json"
             products = parse_tmall_jsonl(path)
-            return [p.price for p in products if p.price > 0]
         elif source == "rose_10brands":
-            path = self.data_root / "ROSE_10BRANDS_Raw_Dump.json"
             products = parse_rose_jsonl(path)
-            return [p.price for p in products if p.price > 0]
-        return []
+        else:
+            return []
+        return [p.price for p in products if p.price > 0]

@@ -18,7 +18,7 @@ from petfish_bi_cli.sentiment.lexicon import analyze_batch_lexicon
 class TrendTool:
     data_root: Path
     registry: ClaimsRegistry
-
+    sources: Any = None
     name: str = "analyze_trend"
     description: str = "Analyze comment/price trends over time (daily/weekly/monthly buckets)"
     input_schema: dict = field(
@@ -45,7 +45,17 @@ class TrendTool:
         bucket = args.get("bucket", "day")
 
         try:
-            records = parse_crocs_csv(self.data_root / "CROCS_原始数据_20260605_144849.csv")
+            csv_path = None
+            if self.sources is not None:
+                csv_path = self.sources.resolve_path("crocs_xiaohongshu")
+            if csv_path is None:
+                import glob
+
+                csv_files = glob.glob(str(self.data_root / "CROCS_*.csv"))
+                csv_path = Path(csv_files[0]) if csv_files else None
+            if csv_path is None:
+                return ToolResult(error="No CROCS CSV data found")
+            records = parse_crocs_csv(csv_path)
         except Exception as exc:
             return ToolResult(error=f"Failed to load data: {exc}")
 

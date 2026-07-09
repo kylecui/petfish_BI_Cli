@@ -17,9 +17,10 @@ from petfish_bi_cli.ingestion.timepoint import (
 class CrossTimeTool(Tool):
     """Compare prices across time snapshots for TMALL/ROSE data."""
 
-    def __init__(self, data_root: Path, registry: ClaimsRegistry):
+    def __init__(self, data_root: Path, registry: ClaimsRegistry, sources=None):
         self.data_root = data_root
         self.registry = registry
+        self.sources = sources
         self._claim_counter = 0
 
     name = "cross_time_compare"
@@ -116,10 +117,13 @@ class CrossTimeTool(Tool):
         )
 
     def _load_snapshots(self, source: str) -> list[TimepointSnapshot]:
+        path = None
+        if self.sources is not None:
+            path = self.sources.resolve_path(source)
+        if path is None:
+            return []
         if source == "tmall_products":
-            path = self.data_root / "TMALL_CROCS_Raw_Memory_Dump.json"
             return parse_tmall_timepoints(path)
-        path = self.data_root / "ROSE_10BRANDS_Raw_Dump.json"
         return parse_rose_timepoints(path)
 
     def _make_claim(self, metric: str, value: float, source: str, computation: str = "") -> Claim:

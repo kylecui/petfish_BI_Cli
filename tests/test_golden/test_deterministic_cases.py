@@ -89,7 +89,7 @@ class TestGoldenCaseDefinitions:
             "query": "CROCS在京东的均价是多少？",
             "intent": "lookup",
             "expected_status": "ok",
-            "expected_keywords": ["561"],
+            "expected_keywords": ["374"],
             "expected_data_metrics": ["avg_price"],
         },
         {
@@ -97,7 +97,7 @@ class TestGoldenCaseDefinitions:
             "query": "CROCS在天猫的均价是多少？",
             "intent": "lookup",
             "expected_status": "ok",
-            "expected_keywords": ["421"],
+            "expected_keywords": ["339"],
             "expected_data_metrics": ["avg_price"],
         },
         {

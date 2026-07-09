@@ -24,6 +24,7 @@ class SentimentAnalysisTool:
     model: Any = None
     mode: str = "hybrid"
     batch_size: int = 50
+    sources: Any = None
     name: str = "analyze_sentiment"
     description: str = (
         "Analyze sentiment of e-commerce comments (positive/negative/neutral, topics, pain points)"
@@ -132,8 +133,17 @@ class SentimentAnalysisTool:
         )
 
     def _load_comments(self, source: str) -> list[str]:
-        if source == "crocs_xiaohongshu":
-            csv_path = self.data_root / "CROCS_原始数据_20260605_144849.csv"
-            records = parse_crocs_csv(csv_path)
+        if source != "crocs_xiaohongshu":
+            return []
+        if self.sources is not None:
+            path = self.sources.resolve_path(source)
+            if path:
+                records = parse_crocs_csv(path)
+                return [r.comment_text for r in records if r.comment_text]
+        import glob
+
+        csv_files = glob.glob(str(self.data_root / "CROCS_*.csv"))
+        if csv_files:
+            records = parse_crocs_csv(Path(csv_files[0]))
             return [r.comment_text for r in records if r.comment_text]
         return []

@@ -29,10 +29,16 @@ class ToolFactory:
         tools: list[Tool] = [
             ExploreDataSourcesTool(sources=sources),
             LoadDataTool(sources=sources, registry=registry, data_root=data_root),
-            SentimentAnalysisTool(data_root=data_root, registry=registry),
-            TrendTool(data_root=data_root, registry=registry),
-            CrossSourceComparisonTool(data_root=data_root, registry=registry),
-            CrossTimeTool(data_root=data_root, registry=registry),
+            SentimentAnalysisTool(
+                data_root=data_root, registry=registry, sources=sources,
+            ),
+            TrendTool(data_root=data_root, registry=registry, sources=sources),
+            CrossSourceComparisonTool(
+                data_root=data_root, registry=registry, sources=sources,
+            ),
+            CrossTimeTool(
+                data_root=data_root, registry=registry, sources=sources,
+            ),
         ]
         if scripts:
             for script_id, cfg in scripts.items():

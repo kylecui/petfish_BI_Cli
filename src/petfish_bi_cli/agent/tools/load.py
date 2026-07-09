@@ -24,18 +24,6 @@ _SOURCE_ALIASES = {
     "rose": "rose_10brands",
 }
 
-_KNOWN_FILE_PATTERNS = {
-    "jd_products": "JD_CROCS_Raw_Memory_Dump.json",
-    "tmall_products": "TMALL_CROCS_Raw_Memory_Dump.json",
-    "rose_10brands": "ROSE_10BRANDS_Raw_Dump.json",
-}
-
-_MOCK_FILE_PATTERNS = {
-    "jd_products": "mock_jd_products.json",
-    "tmall_products": "mock_tmall_products.json",
-    "rose_10brands": "mock_rose_10brands.json",
-}
-
 
 class LoadDataTool:
     """Tool for loading data from a BI source. Returns claims with IDs."""
@@ -173,14 +161,8 @@ class LoadDataTool:
     def _resolve_file(self, decl: SourceDeclaration, source_id: str) -> Path | None:
         if decl.path and decl.path.exists():
             return decl.path
-        pattern = decl.file_pattern or _KNOWN_FILE_PATTERNS.get(source_id, "")
-        if pattern:
-            candidate = self._data_root / pattern
-            if candidate.exists():
-                return candidate
-        mock_pattern = _MOCK_FILE_PATTERNS.get(source_id, "")
-        if mock_pattern:
-            candidate = self._data_root / mock_pattern
+        if decl.file_pattern:
+            candidate = self._data_root / decl.file_pattern
             if candidate.exists():
                 return candidate
         return None

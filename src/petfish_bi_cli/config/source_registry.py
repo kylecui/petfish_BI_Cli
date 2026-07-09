@@ -73,6 +73,18 @@ class SourceRegistry:
     def all_sources(self) -> dict[str, SourceDeclaration]:
         return dict(self._sources)
 
+    def resolve_path(self, source_id: str) -> Path | None:
+        decl = self._sources.get(source_id)
+        if decl is None:
+            return None
+        if decl.path and decl.path.exists():
+            return decl.path
+        if decl.file_pattern:
+            candidate = self._data_root / decl.file_pattern
+            if candidate.exists():
+                return candidate
+        return None
+
     def to_metadata(self) -> dict[str, SourceMetadata]:
         """Convert declarations to legacy SourceMetadata for backward compat."""
         result: dict[str, SourceMetadata] = {}

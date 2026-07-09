@@ -3,15 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 from petfish_bi_cli.agent.tools.cross_source import CrossSourceComparisonTool
+from petfish_bi_cli.config.source_registry import SourceRegistry
 from petfish_bi_cli.grounding.claims import ClaimsRegistry
 
 DATA_ROOT = Path(__file__).parent.parent.parent / "references"
+SOURCES = SourceRegistry(config={}, data_root=DATA_ROOT)
 
 
 class TestCrossSourceComparison:
     def test_jd_vs_tmall_avg_price(self):
         reg = ClaimsRegistry()
-        tool = CrossSourceComparisonTool(data_root=DATA_ROOT, registry=reg)
+        tool = CrossSourceComparisonTool(
+            data_root=DATA_ROOT, registry=reg, sources=SOURCES,
+        )
         result = tool.execute(
             {
                 "sources": ["jd_products", "tmall_products"],
@@ -26,13 +30,17 @@ class TestCrossSourceComparison:
 
     def test_writes_claims_to_registry(self):
         reg = ClaimsRegistry()
-        tool = CrossSourceComparisonTool(data_root=DATA_ROOT, registry=reg)
+        tool = CrossSourceComparisonTool(
+            data_root=DATA_ROOT, registry=reg, sources=SOURCES,
+        )
         tool.execute({"sources": ["jd_products", "tmall_products"]})
         assert reg.count >= 1
 
     def test_product_count_metric(self):
         reg = ClaimsRegistry()
-        tool = CrossSourceComparisonTool(data_root=DATA_ROOT, registry=reg)
+        tool = CrossSourceComparisonTool(
+            data_root=DATA_ROOT, registry=reg, sources=SOURCES,
+        )
         result = tool.execute({"metric": "product_count"})
         assert result.error is None
         assert result.value["comparison"]["jd_products"]["count"] > 0
@@ -41,6 +49,7 @@ class TestCrossSourceComparison:
         tool = CrossSourceComparisonTool(
             data_root=DATA_ROOT,
             registry=ClaimsRegistry(),
+            sources=SOURCES,
         )
         result = tool.execute({"sources": ["unknown_source"]})
         assert result.error is None
@@ -50,6 +59,7 @@ class TestCrossSourceComparison:
         tool = CrossSourceComparisonTool(
             data_root=DATA_ROOT,
             registry=ClaimsRegistry(),
+            sources=SOURCES,
         )
         assert tool.name == "compare_sources"
         assert "data:read" in tool.capabilities
